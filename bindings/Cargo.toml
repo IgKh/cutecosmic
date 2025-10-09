@@ -1,0 +1,18 @@
+[package]
+name = "bindings"
+edition = "2024"
+publish = false
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+libcosmic = { git = "https://github.com/pop-os/libcosmic", default-features = false }
+atomic_refcell = "0.1.13"
+
+[build-dependencies]
+cbindgen = "0.29"
+
+[profile.release]
+opt-level = 3
+panic = "abort"
