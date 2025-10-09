@@ -17,8 +17,6 @@
 use cbindgen::Language;
 
 fn main() {
-    println!("cargo:rerun-if-changed=src/lib.rs");
-
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
     let output_file = std::env::var("BINDINGS_HEADER_PATH").unwrap();
 

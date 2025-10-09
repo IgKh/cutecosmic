@@ -22,6 +22,7 @@
 #include <qpa/qwindowsysteminterface.h>
 
 CuteCosmicPlatformThemePrivate::CuteCosmicPlatformThemePrivate()
+    : d_requestedScheme(Qt::ColorScheme::Unknown)
 {
     d_watcher = new CuteCosmicWatcher(this);
     connect(d_watcher, &CuteCosmicWatcher::themeChanged, this, &CuteCosmicPlatformThemePrivate::themeChanged);
@@ -31,7 +32,23 @@ CuteCosmicPlatformThemePrivate::CuteCosmicPlatformThemePrivate()
 
 void CuteCosmicPlatformThemePrivate::reloadTheme()
 {
-    libcosmic_theme_load();
+    switch (d_requestedScheme) {
+    case Qt::ColorScheme::Dark:
+        libcosmic_theme_load(CosmicThemeKind::Dark);
+        break;
+    case Qt::ColorScheme::Light:
+        libcosmic_theme_load(CosmicThemeKind::Light);
+        break;
+    case Qt::ColorScheme::Unknown:
+        libcosmic_theme_load(CosmicThemeKind::SystemPreference);
+        break;
+    }
+}
+
+void CuteCosmicPlatformThemePrivate::setColorScheme(Qt::ColorScheme scheme)
+{
+    d_requestedScheme = scheme;
+    themeChanged();
 }
 
 void CuteCosmicPlatformThemePrivate::themeChanged()
@@ -53,6 +70,11 @@ Qt::ColorScheme CuteCosmicPlatformTheme::colorScheme() const
 {
     bool dark = libcosmic_theme_is_dark();
     return dark ? Qt::ColorScheme::Dark : Qt::ColorScheme::Light;
+}
+
+void CuteCosmicPlatformTheme::requestColorScheme(Qt::ColorScheme scheme)
+{
+    d_ptr->setColorScheme(scheme);
 }
 
 const QPalette* CuteCosmicPlatformTheme::palette(Palette type) const

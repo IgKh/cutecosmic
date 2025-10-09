@@ -36,12 +36,15 @@ public:
     CuteCosmicPlatformThemePrivate();
 
     void reloadTheme();
+    void setColorScheme(Qt::ColorScheme scheme);
 
 private Q_SLOTS:
     void themeChanged();
 
 private:
     CuteCosmicWatcher* d_watcher;
+
+    Qt::ColorScheme d_requestedScheme;
 };
 
 class CuteCosmicPlatformTheme : public QGenericUnixTheme
@@ -51,6 +54,8 @@ public:
     ~CuteCosmicPlatformTheme();
 
     Qt::ColorScheme colorScheme() const override;
+    void requestColorScheme(Qt::ColorScheme scheme) override;
+
     const QPalette* palette(Palette type) const override;
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)

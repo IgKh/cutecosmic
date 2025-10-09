@@ -11,7 +11,7 @@ public:
     QPlatformTheme* create(const QString& key, const QStringList& params) override;
 };
 
-QPlatformTheme *CuteCosmicPlatformThemePlugin::create(const QString& key, const QStringList& params)
+QPlatformTheme* CuteCosmicPlatformThemePlugin::create(const QString& key, const QStringList& params)
 {
     Q_UNUSED(params);
 

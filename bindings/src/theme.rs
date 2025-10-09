@@ -16,6 +16,14 @@
  */
 use atomic_refcell::{AtomicRef, AtomicRefCell};
 
+#[repr(C)]
+#[allow(dead_code)]
+pub enum CosmicThemeKind {
+    SystemPreference,
+    Dark,
+    Light,
+}
+
 static CURRENT_THEME: AtomicRefCell<Option<cosmic::theme::Theme>> = AtomicRefCell::new(None);
 
 fn current_theme() -> AtomicRef<'static, cosmic::theme::Theme> {
@@ -25,8 +33,12 @@ fn current_theme() -> AtomicRef<'static, cosmic::theme::Theme> {
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn libcosmic_theme_load() {
-    let theme = cosmic::theme::system_preference();
+pub extern "C" fn libcosmic_theme_load(kind: CosmicThemeKind) {
+    let theme = match kind {
+        CosmicThemeKind::SystemPreference => cosmic::theme::system_preference(),
+        CosmicThemeKind::Dark => cosmic::theme::system_dark(),
+        CosmicThemeKind::Light => cosmic::theme::system_light(),
+    };
 
     *CURRENT_THEME.borrow_mut() = Some(theme);
 }
