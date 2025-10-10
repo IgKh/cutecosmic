@@ -25,8 +25,8 @@ struct CuteCosmicFileDialogFilterPattern
     bool isMimeFilter;
     QString pattern;
 
-    friend bool operator==(const CuteCosmicFileDialogFilterPattern& rhs, const CuteCosmicFileDialogFilterPattern& lhs) {
-        return rhs.isMimeFilter == lhs.isMimeFilter && rhs.pattern == lhs.pattern;
+    friend bool operator==(const CuteCosmicFileDialogFilterPattern& lhs, const CuteCosmicFileDialogFilterPattern& rhs) {
+        return lhs.isMimeFilter == rhs.isMimeFilter && lhs.pattern == rhs.pattern;
     }
 };
 Q_DECLARE_METATYPE(CuteCosmicFileDialogFilterPattern)
@@ -39,8 +39,8 @@ struct CuteCosmicFileDialogFilter
 
     bool isValid() const { return !patterns.isEmpty(); }
 
-    friend bool operator==(const CuteCosmicFileDialogFilter& rhs, const CuteCosmicFileDialogFilter& lhs) {
-        return rhs.label == lhs.label && rhs.patterns == lhs.patterns;
+    friend bool operator==(const CuteCosmicFileDialogFilter& lhs, const CuteCosmicFileDialogFilter& rhs) {
+        return lhs.label == rhs.label && lhs.patterns == rhs.patterns;
     }
 
     static CuteCosmicFileDialogFilter parseNameFilter(const QString& filter);

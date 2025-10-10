@@ -16,8 +16,14 @@
  */
 #include "cutecosmicfiledialog.h"
 
-#include <QtGui/private/qdesktopunixservices_p.h>
 #include <QtGui/private/qguiapplication_p.h>
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+#include <QtGui/private/qdesktopunixservices_p.h>
+#else
+#include <QtGui/private/qgenericunixservices_p.h>
+typedef QGenericUnixServices QDesktopUnixServices;
+#endif
 
 #include <qpa/qplatformintegration.h>
 
