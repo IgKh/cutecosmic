@@ -1,4 +1,4 @@
-name: Check Formatting
+name: Quality Checks
 on:
   push:
     branches:

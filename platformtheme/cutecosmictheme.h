@@ -61,6 +61,8 @@ public:
 
     const QPalette* palette(Palette type) const override;
 
+    QVariant themeHint(ThemeHint hint) const override;
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     Qt::ContrastPreference contrastPreference() const override;
 #endif

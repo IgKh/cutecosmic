@@ -28,7 +28,7 @@ fn main() {
         .map_or_else(
             |error| match error {
                 cbindgen::Error::ParseSyntaxError { .. } => {}
-                e => panic!("Unable to generate libcosmic C++ bindings: {:?}", e),
+                e => panic!("Unable to generate libcosmic C++ bindings: {e:?}"),
             },
             |bindings| {
                 bindings.write_to_file(output_file);

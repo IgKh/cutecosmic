@@ -22,6 +22,13 @@
 
 #include <qpa/qwindowsysteminterface.h>
 
+static QString fromRustString(char* value)
+{
+    QString result = QString::fromUtf8(value, qstrlen(value));
+    libcosmic_theme_free_string(value);
+    return result;
+}
+
 CuteCosmicPlatformThemePrivate::CuteCosmicPlatformThemePrivate()
     : d_requestedScheme(Qt::ColorScheme::Unknown)
 {
@@ -106,6 +113,15 @@ const QPalette* CuteCosmicPlatformTheme::palette(Palette type) const
     //
     // In the future - build our own palette based on libcosmic theme.
     return nullptr;
+}
+
+QVariant CuteCosmicPlatformTheme::themeHint(ThemeHint hint) const
+{
+    if (hint == ThemeHint::SystemIconThemeName) {
+        return fromRustString(libcosmic_theme_icon_theme());
+    }
+
+    return QGenericUnixTheme::themeHint(hint);
 }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)

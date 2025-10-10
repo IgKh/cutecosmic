@@ -18,7 +18,7 @@ The following configuration is relayed from COSMIC settings to Qt applications (
 - [x] Per-application dark mode override
 - [x] High contrast mode (Qt 6.10+)
 - [x] File dialogs
-- [ ] Icon theme
+- [x] Icon theme
 - [ ] Fonts
 - [ ] Color palette
 

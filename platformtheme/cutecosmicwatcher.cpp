@@ -30,6 +30,9 @@ static constexpr QLatin1StringView THEME_DARK_CONFIG_ID = "com.system76.CosmicTh
 static constexpr QLatin1StringView THEME_LIGHT_CONFIG_ID = "com.system76.CosmicTheme.Light"_L1;
 static constexpr qulonglong THEME_CONFIG_VERSION = 1;
 
+static constexpr QLatin1StringView COSMIC_TOOLKIT_CONFIG_ID = "com.system76.CosmicTk"_L1;
+static constexpr qulonglong COSMIC_TOOLKIT_CONFIG_VERSION = 1;
+
 CuteCosmicWatcher::CuteCosmicWatcher(QObject* parent)
     : QObject(parent)
 {
@@ -39,6 +42,8 @@ CuteCosmicWatcher::CuteCosmicWatcher(QObject* parent)
     // modes, so we need to watch both.
     watchConfigurationChanges(THEME_DARK_CONFIG_ID, THEME_CONFIG_VERSION);
     watchConfigurationChanges(THEME_LIGHT_CONFIG_ID, THEME_CONFIG_VERSION);
+
+    watchConfigurationChanges(COSMIC_TOOLKIT_CONFIG_ID, COSMIC_TOOLKIT_CONFIG_VERSION);
 
     d_themeChangedEmitTimer = new QTimer(this);
     d_themeChangedEmitTimer->setSingleShot(true);
