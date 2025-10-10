@@ -53,6 +53,9 @@ public:
     CuteCosmicPlatformTheme();
     ~CuteCosmicPlatformTheme();
 
+    bool usePlatformNativeDialog(DialogType type) const override;
+    QPlatformDialogHelper* createPlatformDialogHelper(DialogType type) const override;
+
     Qt::ColorScheme colorScheme() const override;
     void requestColorScheme(Qt::ColorScheme scheme) override;
 

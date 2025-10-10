@@ -5,6 +5,7 @@ if(Qt6_VERSION VERSION_GREATER_EQUAL 6.9.0)
 endif()
 
 set(SOURCES
+    cutecosmicfiledialog.cpp
     cutecosmictheme.cpp
     cutecosmicwatcher.cpp
     main.cpp
@@ -14,6 +15,9 @@ qt_add_plugin(cutecosmictheme
     CLASS_NAME CuteCosmicPlatformThemePlugin
     ${SOURCES}
 )
+
+target_compile_options(cutecosmictheme PRIVATE -Wall -Wextra -pedantic)
+target_compile_definitions(cutecosmictheme PRIVATE QT_NO_CAST_FROM_ASCII QT_NO_KEYWORDS)
 
 target_link_libraries(cutecosmictheme PRIVATE Qt::GuiPrivate Qt::DBus bindings)
 

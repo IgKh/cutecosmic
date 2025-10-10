@@ -60,7 +60,7 @@ void CuteCosmicWatcher::watchConfigurationChanges(const QString& id, qulonglong 
     }
     else {
         QDBusObjectPath path = reply.value();
-        QString service = path.path().sliced(1).replace('/', '.');
+        QString service = path.path().sliced(1).replace(QLatin1Char('/'), QLatin1Char('.'));
 
         QDBusConnection::sessionBus().connect(
             service,

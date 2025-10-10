@@ -15,9 +15,9 @@ Currently consists of a Qt Platform Theme plugin.
 The following configuration is relayed from COSMIC settings to Qt applications (Checked items are implemented, unchecked ones are still TODO):
 
 - [x] Dark mode
-- [X] Per-application dark mode override
+- [x] Per-application dark mode override
 - [x] High contrast mode (Qt 6.10+)
-- [ ] File dialogs
+- [x] File dialogs
 - [ ] Icon theme
 - [ ] Fonts
 - [ ] Color palette

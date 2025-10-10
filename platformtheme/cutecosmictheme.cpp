@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include "cutecosmictheme.h"
+#include "cutecosmicfiledialog.h"
 #include "cutecosmicwatcher.h"
 
 #include "bindings.h"
@@ -64,6 +65,22 @@ CuteCosmicPlatformTheme::CuteCosmicPlatformTheme()
 
 CuteCosmicPlatformTheme::~CuteCosmicPlatformTheme()
 {
+}
+
+bool CuteCosmicPlatformTheme::usePlatformNativeDialog(DialogType type) const
+{
+    if (type == DialogType::FileDialog) {
+        return true;
+    }
+    return QGenericUnixTheme::usePlatformNativeDialog(type);
+}
+
+QPlatformDialogHelper* CuteCosmicPlatformTheme::createPlatformDialogHelper(DialogType type) const
+{
+    if (type == DialogType::FileDialog) {
+        return new CuteCosmicFileDialog();
+    }
+    return QGenericUnixTheme::createPlatformDialogHelper(type);
 }
 
 Qt::ColorScheme CuteCosmicPlatformTheme::colorScheme() const

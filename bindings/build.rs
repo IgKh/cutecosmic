@@ -18,12 +18,20 @@ use cbindgen::Language;
 
 fn main() {
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-    let output_file = std::env::var("BINDINGS_HEADER_PATH").unwrap();
+    let output_file =
+        std::env::var("BINDINGS_HEADER_PATH").unwrap_or(String::from("target/bindings.h"));
 
     cbindgen::Builder::new()
         .with_crate(manifest_dir)
         .with_language(Language::Cxx)
         .generate()
-        .expect("Unable to generate libcosmic C++ bindings")
-        .write_to_file(output_file);
+        .map_or_else(
+            |error| match error {
+                cbindgen::Error::ParseSyntaxError { .. } => {}
+                e => panic!("Unable to generate libcosmic C++ bindings: {:?}", e),
+            },
+            |bindings| {
+                bindings.write_to_file(output_file);
+            },
+        );
 }
