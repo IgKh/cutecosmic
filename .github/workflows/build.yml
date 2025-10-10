@@ -2,8 +2,10 @@ name: Test build the plugin
 on:
   push:
     branches:
-      - '**'
-    pull_request:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
