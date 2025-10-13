@@ -24,6 +24,13 @@
 
 #include <QFont>
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+static constexpr int DEFAULT_FONT_SIZE = QGenericUnixTheme::defaultSystemFontSize;
+#else
+// https://github.com/qt/qtbase/blob/6.9/src/gui/platform/unix/qgenericunixthemes.cpp#L78
+static constexpr int DEFAULT_FONT_SIZE = 9;
+#endif
+
 static QString consumeRustString(char* value)
 {
     QString result = QString::fromUtf8(value, qstrlen(value));
@@ -49,9 +56,8 @@ static std::unique_ptr<QFont> loadFont(CosmicFontKind kind)
     // apps seem crowded, so best to keep with the smaller Qt default size.
 
     QString family = consumeRustString(fc.family);
-    const int size = QGenericUnixTheme::defaultSystemFontSize;
 
-    auto font = std::make_unique<QFont>(family, size);
+    auto font = std::make_unique<QFont>(family, DEFAULT_FONT_SIZE);
     font->setWeight(static_cast<QFont::Weight>(fc.weight));
     font->setStretch(fc.stretch);
 
