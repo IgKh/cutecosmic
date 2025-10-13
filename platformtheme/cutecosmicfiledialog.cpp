@@ -44,12 +44,12 @@ using namespace Qt::StringLiterals;
  * in libcosmic (as we want to behave as any native COSMIC application would
  * do), that API is missing important functionality at the moment and is very
  * convoluted. As it ends up going through the portal anyway, it makes no sense
- * to suffer through writing FFI bindings for it at the moment. Revisit this
- * in the future.
+ * to suffer through writing FFI bindings for it right now. Revisit this in the
+ * future.
  *
  * This implementation is somewhat simpler than the one in the generic XDG
  * portal platform theme in the Qt tree, as we can assume that COSMIC is the
- * native environment, as there is no other native dialog integration to fall
+ * native environment and there is no other native dialog integration to fall
  * back on. This means that if anything is wrong, we can just ask Qt to use
  * a non-native dialog by returning false from the show() method.
  */

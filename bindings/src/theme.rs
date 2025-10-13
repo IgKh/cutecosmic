@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-use std::ffi::{CString, c_char};
+use std::ffi::{CString, c_char, c_int};
 
 use atomic_refcell::{AtomicRef, AtomicRefCell};
 use cosmic::{config::CosmicTk, cosmic_config::CosmicConfigEntry};
@@ -25,6 +25,28 @@ pub enum CosmicThemeKind {
     SystemPreference,
     Dark,
     Light,
+}
+
+#[repr(C)]
+#[allow(dead_code)]
+pub enum CosmicFontKind {
+    Interface,
+    Monospace,
+}
+
+#[repr(C)]
+pub enum CosmicFontStyle {
+    Normal,
+    Italic,
+    Oblique,
+}
+
+#[repr(C)]
+pub struct CosmicFont {
+    family: *mut c_char,
+    style: CosmicFontStyle,
+    weight: c_int,
+    stretch: c_int,
 }
 
 static CURRENT_THEME: AtomicRefCell<Option<cosmic::theme::Theme>> = AtomicRefCell::new(None);
@@ -40,6 +62,14 @@ fn current_tk() -> AtomicRef<'static, CosmicTk> {
     AtomicRef::map(COSMIC_TK.borrow(), |o| {
         o.as_ref().expect("Toolkit configuration not loaded")
     })
+}
+
+fn strdup(value: &str) -> *mut c_char {
+    if let Ok(value) = CString::new(value) {
+        value.into_raw()
+    } else {
+        std::ptr::null_mut()
+    }
 }
 
 #[unsafe(no_mangle)]
@@ -85,9 +115,53 @@ pub extern "C" fn libcosmic_theme_is_high_contrast() -> bool {
 pub extern "C" fn libcosmic_theme_icon_theme() -> *mut c_char {
     let tk = current_tk();
 
-    if let Ok(value) = CString::new(tk.icon_theme.as_str()) {
-        value.into_raw()
-    } else {
-        std::ptr::null_mut()
+    strdup(&tk.icon_theme)
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn libcosmic_theme_get_font(kind: CosmicFontKind, target: *mut CosmicFont) {
+    if target.is_null() {
+        return;
     }
+    let target: &mut CosmicFont = unsafe { &mut *target };
+
+    let tk = current_tk();
+    let font = match kind {
+        CosmicFontKind::Interface => &tk.interface_font,
+        CosmicFontKind::Monospace => &tk.monospace_font,
+    };
+
+    target.family = strdup(&font.family);
+
+    target.style = match font.style {
+        cosmic::iced::font::Style::Normal => CosmicFontStyle::Normal,
+        cosmic::iced::font::Style::Italic => CosmicFontStyle::Italic,
+        cosmic::iced::font::Style::Oblique => CosmicFontStyle::Oblique,
+    };
+
+    // From https://doc.qt.io/qt-6/qfont.html#Weight-enum
+    target.weight = match font.weight {
+        cosmic::iced::font::Weight::Thin => 100,
+        cosmic::iced::font::Weight::ExtraLight => 200,
+        cosmic::iced::font::Weight::Light => 300,
+        cosmic::iced::font::Weight::Normal => 400,
+        cosmic::iced::font::Weight::Medium => 500,
+        cosmic::iced::font::Weight::Semibold => 600,
+        cosmic::iced::font::Weight::Bold => 700,
+        cosmic::iced::font::Weight::ExtraBold => 800,
+        cosmic::iced::font::Weight::Black => 900,
+    };
+
+    // From https://doc.qt.io/qt-6/qfont.html#Stretch-enum
+    target.stretch = match font.stretch {
+        cosmic::iced::font::Stretch::UltraCondensed => 50,
+        cosmic::iced::font::Stretch::ExtraCondensed => 62,
+        cosmic::iced::font::Stretch::Condensed => 75,
+        cosmic::iced::font::Stretch::SemiCondensed => 87,
+        cosmic::iced::font::Stretch::Normal => 100,
+        cosmic::iced::font::Stretch::SemiExpanded => 112,
+        cosmic::iced::font::Stretch::Expanded => 125,
+        cosmic::iced::font::Stretch::ExtraExpanded => 150,
+        cosmic::iced::font::Stretch::UltraExpanded => 200,
+    };
 }

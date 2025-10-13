@@ -42,9 +42,13 @@ private Q_SLOTS:
     void themeChanged();
 
 private:
+    friend class CuteCosmicPlatformTheme;
+
     CuteCosmicWatcher* d_watcher;
 
     Qt::ColorScheme d_requestedScheme;
+    std::unique_ptr<QFont> d_interfaceFont;
+    std::unique_ptr<QFont> d_monospaceFont;
 };
 
 class CuteCosmicPlatformTheme : public QGenericUnixTheme
@@ -60,6 +64,7 @@ public:
     void requestColorScheme(Qt::ColorScheme scheme) override;
 
     const QPalette* palette(Palette type) const override;
+    const QFont* font(Font type) const override;
 
     QVariant themeHint(ThemeHint hint) const override;
 

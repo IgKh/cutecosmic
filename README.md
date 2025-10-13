@@ -19,7 +19,7 @@ The following configuration is relayed from COSMIC settings to Qt applications (
 - [x] High contrast mode (Qt 6.10+)
 - [x] File dialogs
 - [x] Icon theme
-- [ ] Fonts
+- [x] Fonts
 - [ ] Color palette
 
 ## Installation
