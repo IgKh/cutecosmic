@@ -18,13 +18,13 @@
 
 #include <QObject>
 
+#include <memory>
+
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
 #include <QtGui/private/qgenericunixtheme_p.h>
 #else
 #include <QtGui/private/qgenericunixthemes_p.h>
 #endif
-
-#include <memory>
 
 class CuteCosmicWatcher;
 
@@ -40,6 +40,7 @@ public:
 
 private Q_SLOTS:
     void themeChanged();
+    void rebuildPalette();
 
 private:
     friend class CuteCosmicPlatformTheme;
@@ -47,6 +48,7 @@ private:
     CuteCosmicWatcher* d_watcher;
 
     Qt::ColorScheme d_requestedScheme;
+    std::unique_ptr<QPalette> d_systemPalette;
     std::unique_ptr<QFont> d_interfaceFont;
     std::unique_ptr<QFont> d_monospaceFont;
 };

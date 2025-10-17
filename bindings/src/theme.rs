@@ -19,35 +19,8 @@ use std::ffi::{CString, c_char, c_int};
 use atomic_refcell::{AtomicRef, AtomicRefCell};
 use cosmic::{config::CosmicTk, cosmic_config::CosmicConfigEntry};
 
-#[repr(C)]
-#[allow(dead_code)]
-pub enum CosmicThemeKind {
-    SystemPreference,
-    Dark,
-    Light,
-}
-
-#[repr(C)]
-#[allow(dead_code)]
-pub enum CosmicFontKind {
-    Interface,
-    Monospace,
-}
-
-#[repr(C)]
-pub enum CosmicFontStyle {
-    Normal,
-    Italic,
-    Oblique,
-}
-
-#[repr(C)]
-pub struct CosmicFont {
-    family: *mut c_char,
-    style: CosmicFontStyle,
-    weight: c_int,
-    stretch: c_int,
-}
+type ThemeColor =
+    cosmic::cosmic_theme::palette::Alpha<cosmic::cosmic_theme::palette::rgb::Rgb, f32>;
 
 static CURRENT_THEME: AtomicRefCell<Option<cosmic::theme::Theme>> = AtomicRefCell::new(None);
 static COSMIC_TK: AtomicRefCell<Option<CosmicTk>> = AtomicRefCell::new(None);
@@ -84,6 +57,14 @@ pub unsafe extern "C" fn libcosmic_theme_free_string(ptr: *mut c_char) {
     let _ = unsafe { CString::from_raw(ptr) };
 }
 
+#[repr(C)]
+#[allow(dead_code)]
+pub enum CosmicThemeKind {
+    SystemPreference,
+    Dark,
+    Light,
+}
+
 #[unsafe(no_mangle)]
 pub extern "C" fn libcosmic_theme_load(kind: CosmicThemeKind) {
     let theme = match kind {
@@ -116,6 +97,94 @@ pub extern "C" fn libcosmic_theme_icon_theme() -> *mut c_char {
     let tk = current_tk();
 
     strdup(&tk.icon_theme)
+}
+
+#[repr(C)]
+pub struct CosmicColor {
+    red: u8,
+    green: u8,
+    blue: u8,
+    alpha: u8,
+}
+
+impl From<&ThemeColor> for CosmicColor {
+    fn from(value: &ThemeColor) -> Self {
+        CosmicColor {
+            red: (value.red * 256.0).trunc() as u8,
+            green: (value.green * 256.0).trunc() as u8,
+            blue: (value.blue * 256.0).trunc() as u8,
+            alpha: (value.alpha * 256.0).trunc() as u8,
+        }
+    }
+}
+
+#[repr(C)]
+pub struct CosmicPalette {
+    window: CosmicColor,
+    window_text: CosmicColor,
+    background: CosmicColor,
+    text: CosmicColor,
+    background_disabled: CosmicColor,
+    text_disabled: CosmicColor,
+    button: CosmicColor,
+    button_text: CosmicColor,
+    tooltip: CosmicColor,
+    accent: CosmicColor,
+    accent_text: CosmicColor,
+    accent_disabled: CosmicColor,
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn libcosmic_theme_get_palette(target: *mut CosmicPalette) {
+    if target.is_null() {
+        return;
+    }
+
+    let target: &mut CosmicPalette = unsafe { &mut *target };
+    let theme = current_theme();
+    let cosmic = theme.cosmic();
+
+    target.window = (&cosmic.background.base).into();
+    target.window_text = (&cosmic.background.on).into();
+    target.background = (&cosmic.primary.base).into();
+    target.text = (&cosmic.primary.on).into();
+    target.background_disabled = (&cosmic.primary.component.disabled).into();
+    target.text_disabled = (&cosmic.primary.component.on_disabled).into();
+    target.button = (&cosmic.primary.component.base).into();
+    target.button_text = (&cosmic.primary.component.on).into();
+    target.accent = (&cosmic.accent.base).into();
+    target.accent_text = (&cosmic.accent.on).into();
+    target.accent_disabled = (&cosmic.accent.disabled).into();
+
+    // https://github.com/pop-os/libcosmic/blob/76c1897d4d9a637c8aa4016483bf05fec5f10ebd/src/theme/style/iced.rs#L584
+    target.tooltip = (&cosmic.palette.neutral_2).into();
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn libcosmic_theme_should_apply_colors() -> bool {
+    current_tk().apply_theme_global
+}
+
+#[repr(C)]
+#[allow(dead_code)]
+pub enum CosmicFontKind {
+    Interface,
+    Monospace,
+}
+
+#[repr(C)]
+pub enum CosmicFontStyle {
+    Normal,
+    Italic,
+    Oblique,
+}
+
+#[repr(C)]
+pub struct CosmicFont {
+    family: *mut c_char,
+    style: CosmicFontStyle,
+    weight: c_int,
+    stretch: c_int,
 }
 
 #[unsafe(no_mangle)]

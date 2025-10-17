@@ -23,6 +23,7 @@
 #include <qpa/qwindowsysteminterface.h>
 
 #include <QFont>
+#include <QPalette>
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
 static constexpr int DEFAULT_FONT_SIZE = QGenericUnixTheme::defaultSystemFontSize;
@@ -103,6 +104,8 @@ void CuteCosmicPlatformThemePrivate::reloadTheme()
         break;
     }
 
+    rebuildPalette();
+
     d_interfaceFont = loadFont(CosmicFontKind::Interface);
     d_monospaceFont = loadFont(CosmicFontKind::Monospace);
 }
@@ -120,6 +123,70 @@ void CuteCosmicPlatformThemePrivate::themeChanged()
 {
     reloadTheme();
     QWindowSystemInterface::handleThemeChange();
+}
+
+static QColor convertColor(const CosmicColor& color)
+{
+    return qRgba(color.red, color.green, color.blue, color.alpha);
+}
+
+void CuteCosmicPlatformThemePrivate::rebuildPalette()
+{
+    if (!libcosmic_theme_should_apply_colors()) {
+        // NULL palette means that the active style dictates the colors
+        d_systemPalette.reset();
+        return;
+    }
+
+    CosmicPalette p;
+    libcosmic_theme_get_palette(&p);
+
+    QColor window = convertColor(p.window);
+    QColor windowText = convertColor(p.window_text);
+    QColor background = convertColor(p.background);
+    QColor text = convertColor(p.text);
+    QColor disabledBackground = convertColor(p.background_disabled);
+    QColor disabledText = convertColor(p.text_disabled);
+    QColor button = convertColor(p.button);
+    QColor buttonText = convertColor(p.button_text);
+    QColor accent = convertColor(p.accent);
+    QColor accentText = convertColor(p.accent_text);
+    QColor disabledAccent = convertColor(p.accent_disabled);
+    QColor tooltip = convertColor(p.tooltip);
+
+    // Bevel colors - same definition as in Fusion palette
+    QColor light = button.lighter(150);
+    QColor mid = button.darker(130);
+    QColor midLight = mid.lighter(110);
+    QColor dark = button.darker(150);
+
+    QColor placeholderText = text;
+    placeholderText.setAlphaF(0.5);
+
+    d_systemPalette = std::make_unique<QPalette>(
+        windowText, button, light, dark, mid, text, light, background, window);
+
+    d_systemPalette->setColor(QPalette::Midlight, midLight);
+    d_systemPalette->setColor(QPalette::ToolTipBase, tooltip);
+    d_systemPalette->setColor(QPalette::ToolTipText, windowText);
+    d_systemPalette->setColor(QPalette::HighlightedText, accentText);
+    d_systemPalette->setColor(QPalette::PlaceholderText, placeholderText);
+    d_systemPalette->setColor(QPalette::Link, accent);
+
+    d_systemPalette->setColor(QPalette::Disabled, QPalette::Base, disabledBackground);
+    d_systemPalette->setColor(QPalette::Disabled, QPalette::Text, disabledText);
+    d_systemPalette->setColor(QPalette::Disabled, QPalette::ButtonText, disabledText);
+
+    d_systemPalette->setColor(QPalette::Active, QPalette::ButtonText, buttonText);
+    d_systemPalette->setColor(QPalette::Inactive, QPalette::ButtonText, buttonText);
+
+    d_systemPalette->setColor(QPalette::Active, QPalette::Highlight, accent);
+    d_systemPalette->setColor(QPalette::Inactive, QPalette::Highlight, accent);
+    d_systemPalette->setColor(QPalette::Disabled, QPalette::Highlight, disabledAccent);
+
+    d_systemPalette->setColor(QPalette::Active, QPalette::Accent, accent);
+    d_systemPalette->setColor(QPalette::Inactive, QPalette::Accent, accent);
+    d_systemPalette->setColor(QPalette::Disabled, QPalette::Accent, disabledAccent);
 }
 
 CuteCosmicPlatformTheme::CuteCosmicPlatformTheme()
@@ -160,15 +227,9 @@ void CuteCosmicPlatformTheme::requestColorScheme(Qt::ColorScheme scheme)
 
 const QPalette* CuteCosmicPlatformTheme::palette(Palette type) const
 {
-    Q_UNUSED(type);
-
-    // Crude workaround for now - QPlatformTheme::palette() caches the fusion
-    // palette, and there is seemingly no good way to invalidate that on theme
-    // change. As per QApplicationPrivate::basePalette(), platform theme palette
-    // takes precedence over the default style, so for now just return NULL here
-    // to let the active QStyle dictate the palette.
-    //
-    // In the future - build our own palette based on libcosmic theme.
+    if (type == QPlatformTheme::SystemPalette) {
+        return d_ptr->d_systemPalette.get();
+    }
     return nullptr;
 }
 
@@ -185,7 +246,7 @@ const QFont* CuteCosmicPlatformTheme::font(Font type) const
 
 QVariant CuteCosmicPlatformTheme::themeHint(ThemeHint hint) const
 {
-    if (hint == ThemeHint::SystemIconThemeName) {
+    if (hint == QPlatformTheme::SystemIconThemeName) {
         return consumeRustString(libcosmic_theme_icon_theme());
     }
 

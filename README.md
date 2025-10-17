@@ -12,7 +12,7 @@ Currently consists of a Qt Platform Theme plugin.
 
 ## Features
 
-The following configuration is relayed from COSMIC settings to Qt applications (Checked items are implemented, unchecked ones are still TODO):
+The following configuration is relayed from COSMIC settings to Qt applications:
 
 - [x] Dark mode
 - [x] Per-application dark mode override
@@ -20,7 +20,9 @@ The following configuration is relayed from COSMIC settings to Qt applications (
 - [x] File dialogs
 - [x] Icon theme
 - [x] Fonts
-- [ ] Color palette
+- [x] Color palette[^1]
+
+[^1]: Requires enabling the toolkit theming option in COSMIC settings. Does not fully apply to KDE applications.
 
 ## Installation
 
@@ -61,4 +63,6 @@ Issue reports and code contributions are gratefully accepted. Please do not send
 
 ## License
 
-[GPL v3](https://choosealicense.com/licenses/gpl-3.0/)
+Copyright 2025 Igor Khanin.
+
+Made available under the [GPL v3](https://choosealicense.com/licenses/gpl-3.0/) license.
