@@ -47,6 +47,7 @@ private:
 
     CuteCosmicWatcher* d_watcher;
 
+    bool d_firstThemeChange;
     Qt::ColorScheme d_requestedScheme;
     std::unique_ptr<QPalette> d_systemPalette;
     std::unique_ptr<QFont> d_interfaceFont;

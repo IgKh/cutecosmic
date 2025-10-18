@@ -16,72 +16,32 @@
  */
 #include "cutecosmicwatcher.h"
 
-#include <QDBusConnection>
-#include <QDBusInterface>
-#include <QDBusReply>
+#include "bindings.h"
+
 #include <QTimer>
-
-using namespace Qt::StringLiterals;
-
-static constexpr QLatin1StringView THEME_MODE_CONFIG_ID = "com.system76.CosmicTheme.Mode"_L1;
-static constexpr qulonglong THEME_MODE_CONFIG_VERSION = 1;
-
-static constexpr QLatin1StringView THEME_DARK_CONFIG_ID = "com.system76.CosmicTheme.Dark"_L1;
-static constexpr QLatin1StringView THEME_LIGHT_CONFIG_ID = "com.system76.CosmicTheme.Light"_L1;
-static constexpr qulonglong THEME_CONFIG_VERSION = 1;
-
-static constexpr QLatin1StringView COSMIC_TOOLKIT_CONFIG_ID = "com.system76.CosmicTk"_L1;
-static constexpr qulonglong COSMIC_TOOLKIT_CONFIG_VERSION = 1;
 
 CuteCosmicWatcher::CuteCosmicWatcher(QObject* parent)
     : QObject(parent)
 {
-    watchConfigurationChanges(THEME_MODE_CONFIG_ID, THEME_MODE_CONFIG_VERSION);
-
-    // Most theme related settings are maintained separately for dark and light
-    // modes, so we need to watch both.
-    watchConfigurationChanges(THEME_DARK_CONFIG_ID, THEME_CONFIG_VERSION);
-    watchConfigurationChanges(THEME_LIGHT_CONFIG_ID, THEME_CONFIG_VERSION);
-
-    watchConfigurationChanges(COSMIC_TOOLKIT_CONFIG_ID, COSMIC_TOOLKIT_CONFIG_VERSION);
-
     d_themeChangedEmitTimer = new QTimer(this);
     d_themeChangedEmitTimer->setSingleShot(true);
     d_themeChangedEmitTimer->setInterval(50);
     d_themeChangedEmitTimer->callOnTimeout(this, &CuteCosmicWatcher::themeChanged);
-}
 
-void CuteCosmicWatcher::watchConfigurationChanges(const QString& id, qulonglong version)
-{
-    QDBusInterface iface {
-        "com.system76.CosmicSettingsDaemon"_L1,
-        "/com/system76/CosmicSettingsDaemon"_L1,
-        "com.system76.CosmicSettingsDaemon"_L1
+    auto callback = [](void* data) {
+        CuteCosmicWatcher* self = reinterpret_cast<CuteCosmicWatcher*>(data);
+        QMetaObject::invokeMethod(self, "configurationChanged", Qt::QueuedConnection);
     };
-
-    QDBusReply<QDBusObjectPath> reply = iface.call("WatchConfig"_L1, id, version);
-    if (!reply.isValid()) {
-        qWarning() << "Failed watching COSMIC configuration entry" << id << ": " << reply.error();
-    }
-    else {
-        QDBusObjectPath path = reply.value();
-        QString service = path.path().sliced(1).replace(QLatin1Char('/'), QLatin1Char('.'));
-
-        QDBusConnection::sessionBus().connect(
-            service,
-            path.path(),
-            "com.system76.CosmicSettingsDaemon.Config"_L1,
-            "Changed"_L1,
-            this,
-            SLOT(configurationChanged(QString, QString)));
-    }
+    libcosmic_watcher_start(callback, reinterpret_cast<void*>(this));
 }
 
-void CuteCosmicWatcher::configurationChanged(QString id, QString key)
+CuteCosmicWatcher::~CuteCosmicWatcher()
 {
-    Q_UNUSED(id);
-    Q_UNUSED(key);
+    libcosmic_watcher_stop();
+}
 
+void CuteCosmicWatcher::configurationChanged()
+{
     if (!d_themeChangedEmitTimer->isActive()) {
         d_themeChangedEmitTimer->start();
     }
