@@ -8,6 +8,7 @@ crate-type = ["staticlib"]
 
 [dependencies]
 libcosmic = { git = "https://github.com/pop-os/libcosmic", default-features = false }
+cosmic-settings-daemon = { git = "https://github.com/pop-os/dbus-settings-bindings" }
 atomic_refcell = "0.1.13"
 
 [build-dependencies]

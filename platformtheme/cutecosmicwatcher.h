@@ -26,14 +26,13 @@ class CuteCosmicWatcher : public QObject
 
 public:
     CuteCosmicWatcher(QObject* parent = nullptr);
-
-    void watchConfigurationChanges(const QString& id, qulonglong version);
+    ~CuteCosmicWatcher();
 
 Q_SIGNALS:
     void themeChanged();
 
 private Q_SLOTS:
-    void configurationChanged(QString id, QString key);
+    void configurationChanged();
 
 private:
     QTimer* d_themeChangedEmitTimer;

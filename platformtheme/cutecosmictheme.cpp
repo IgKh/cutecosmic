@@ -82,7 +82,8 @@ static std::unique_ptr<QFont> loadFont(CosmicFontKind kind)
 }
 
 CuteCosmicPlatformThemePrivate::CuteCosmicPlatformThemePrivate()
-    : d_requestedScheme(Qt::ColorScheme::Unknown)
+    : d_firstThemeChange(true)
+    , d_requestedScheme(Qt::ColorScheme::Unknown)
 {
     d_watcher = new CuteCosmicWatcher(this);
     connect(d_watcher, &CuteCosmicWatcher::themeChanged, this, &CuteCosmicPlatformThemePrivate::themeChanged);
@@ -121,6 +122,14 @@ void CuteCosmicPlatformThemePrivate::setColorScheme(Qt::ColorScheme scheme)
 
 void CuteCosmicPlatformThemePrivate::themeChanged()
 {
+    // A little bit of a hack - libcosmic configuration subscriptions emit the
+    // current value as soon as they are set up, and we don't need this. So
+    // ignore the first theme change notification.
+    if (d_firstThemeChange) {
+        d_firstThemeChange = false;
+        return;
+    }
+
     reloadTheme();
     QWindowSystemInterface::handleThemeChange();
 }
