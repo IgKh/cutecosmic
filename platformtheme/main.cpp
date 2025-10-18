@@ -4,8 +4,8 @@
 
 class CuteCosmicPlatformThemePlugin : public QPlatformThemePlugin
 {
-   Q_OBJECT
-   Q_PLUGIN_METADATA(IID QPlatformThemeFactoryInterface_iid FILE "cosmic.json")
+    Q_OBJECT
+    Q_PLUGIN_METADATA(IID QPlatformThemeFactoryInterface_iid FILE "cosmic.json")
 
 public:
     QPlatformTheme* create(const QString& key, const QStringList& params) override;

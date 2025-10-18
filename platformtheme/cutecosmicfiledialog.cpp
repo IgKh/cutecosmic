@@ -71,10 +71,7 @@ CuteCosmicFileDialogFilter CuteCosmicFileDialogFilter::parseNameFilter(const QSt
 
     QList<CuteCosmicFileDialogFilterPattern> pats;
     for (const QString& pattern : patterns) {
-        pats.append(CuteCosmicFileDialogFilterPattern {
-            false,
-            pattern
-        });
+        pats.append(CuteCosmicFileDialogFilterPattern { false, pattern });
     }
 
     return CuteCosmicFileDialogFilter {
@@ -95,12 +92,7 @@ CuteCosmicFileDialogFilter CuteCosmicFileDialogFilter::parseMimeFilter(const QSt
 
     return CuteCosmicFileDialogFilter {
         mimeType.comment(),
-        {
-            CuteCosmicFileDialogFilterPattern {
-                true,
-                filter
-            }
-        },
+        { CuteCosmicFileDialogFilterPattern { true, filter } },
         filter
     };
 }
@@ -406,7 +398,7 @@ bool CuteCosmicFileDialog::isDirectoryChooserSupported()
         "org.freedesktop.DBus.Properties"_L1,
     };
 
-    QDBusReply<QVariant> reply =  iface.call("Get"_L1, "org.freedesktop.portal.FileChooser"_L1, "version"_L1);
+    QDBusReply<QVariant> reply = iface.call("Get"_L1, "org.freedesktop.portal.FileChooser"_L1, "version"_L1);
     if (reply.isValid()) {
         uint version = reply.value().toUInt();
         return version >= 3;

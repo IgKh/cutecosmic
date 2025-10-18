@@ -25,7 +25,8 @@ struct CuteCosmicFileDialogFilterPattern
     bool isMimeFilter;
     QString pattern;
 
-    friend bool operator==(const CuteCosmicFileDialogFilterPattern& lhs, const CuteCosmicFileDialogFilterPattern& rhs) {
+    friend bool operator==(const CuteCosmicFileDialogFilterPattern& lhs, const CuteCosmicFileDialogFilterPattern& rhs)
+    {
         return lhs.isMimeFilter == rhs.isMimeFilter && lhs.pattern == rhs.pattern;
     }
 };
@@ -39,7 +40,8 @@ struct CuteCosmicFileDialogFilter
 
     bool isValid() const { return !patterns.isEmpty(); }
 
-    friend bool operator==(const CuteCosmicFileDialogFilter& lhs, const CuteCosmicFileDialogFilter& rhs) {
+    friend bool operator==(const CuteCosmicFileDialogFilter& lhs, const CuteCosmicFileDialogFilter& rhs)
+    {
         return lhs.label == rhs.label && lhs.patterns == rhs.patterns;
     }
 
