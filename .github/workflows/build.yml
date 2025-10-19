@@ -20,6 +20,11 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      - name: Disable mandb triggers
+        run: |
+          echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+          sudo dpkg-reconfigure man-db
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
