@@ -109,6 +109,7 @@ pub struct CosmicColor {
 
 impl From<&ThemeColor> for CosmicColor {
     fn from(value: &ThemeColor) -> Self {
+        #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
         CosmicColor {
             red: (value.red * 256.0).trunc() as u8,
             green: (value.green * 256.0).trunc() as u8,
@@ -122,12 +123,14 @@ impl From<&ThemeColor> for CosmicColor {
 pub struct CosmicPalette {
     window: CosmicColor,
     window_text: CosmicColor,
+    window_text_disabled: CosmicColor,
+    window_component: CosmicColor,
     background: CosmicColor,
     text: CosmicColor,
-    background_disabled: CosmicColor,
     text_disabled: CosmicColor,
-    button: CosmicColor,
-    button_text: CosmicColor,
+    component: CosmicColor,
+    component_text: CosmicColor,
+    component_text_disabled: CosmicColor,
     tooltip: CosmicColor,
     accent: CosmicColor,
     accent_text: CosmicColor,
@@ -146,12 +149,14 @@ pub extern "C" fn libcosmic_theme_get_palette(target: *mut CosmicPalette) {
 
     target.window = (&cosmic.background.base).into();
     target.window_text = (&cosmic.background.on).into();
+    target.window_text_disabled = (&cosmic.background.component.on_disabled).into();
+    target.window_component = (&cosmic.background.component.base).into();
     target.background = (&cosmic.primary.base).into();
     target.text = (&cosmic.primary.on).into();
-    target.background_disabled = (&cosmic.primary.component.disabled).into();
     target.text_disabled = (&cosmic.primary.component.on_disabled).into();
-    target.button = (&cosmic.primary.component.base).into();
-    target.button_text = (&cosmic.primary.component.on).into();
+    target.component = (&cosmic.primary.component.base).into();
+    target.component_text = (&cosmic.primary.component.on).into();
+    target.component_text_disabled = (&cosmic.primary.component.on_disabled).into();
     target.accent = (&cosmic.accent.base).into();
     target.accent_text = (&cosmic.accent.on).into();
     target.accent_disabled = (&cosmic.accent.disabled).into();

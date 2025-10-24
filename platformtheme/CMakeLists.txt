@@ -5,6 +5,7 @@ if(Qt6_VERSION VERSION_GREATER_EQUAL 6.9.0)
 endif()
 
 set(SOURCES
+    cutecosmiccolormanager.cpp
     cutecosmicfiledialog.cpp
     cutecosmictheme.cpp
     cutecosmicwatcher.cpp

@@ -26,6 +26,7 @@
 #include <QtGui/private/qgenericunixthemes_p.h>
 #endif
 
+class CuteCosmicColorManager;
 class CuteCosmicWatcher;
 
 class CuteCosmicPlatformThemePrivate : public QObject
@@ -40,16 +41,15 @@ public:
 
 private Q_SLOTS:
     void themeChanged();
-    void rebuildPalette();
 
 private:
     friend class CuteCosmicPlatformTheme;
 
     CuteCosmicWatcher* d_watcher;
+    CuteCosmicColorManager* d_colorManager;
 
     bool d_firstThemeChange;
     Qt::ColorScheme d_requestedScheme;
-    std::unique_ptr<QPalette> d_systemPalette;
     std::unique_ptr<QFont> d_interfaceFont;
     std::unique_ptr<QFont> d_monospaceFont;
 };

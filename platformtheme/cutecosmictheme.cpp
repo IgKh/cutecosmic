@@ -15,6 +15,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 #include "cutecosmictheme.h"
+#include "cutecosmiccolormanager.h"
 #include "cutecosmicfiledialog.h"
 #include "cutecosmicwatcher.h"
 
@@ -88,6 +89,8 @@ CuteCosmicPlatformThemePrivate::CuteCosmicPlatformThemePrivate()
     d_watcher = new CuteCosmicWatcher(this);
     connect(d_watcher, &CuteCosmicWatcher::themeChanged, this, &CuteCosmicPlatformThemePrivate::themeChanged);
 
+    d_colorManager = new CuteCosmicColorManager(this);
+
     reloadTheme();
 }
 
@@ -105,7 +108,7 @@ void CuteCosmicPlatformThemePrivate::reloadTheme()
         break;
     }
 
-    rebuildPalette();
+    d_colorManager->reloadThemeColors();
 
     d_interfaceFont = loadFont(CosmicFontKind::Interface);
     d_monospaceFont = loadFont(CosmicFontKind::Monospace);
@@ -132,70 +135,6 @@ void CuteCosmicPlatformThemePrivate::themeChanged()
 
     reloadTheme();
     QWindowSystemInterface::handleThemeChange();
-}
-
-static QColor convertColor(const CosmicColor& color)
-{
-    return qRgba(color.red, color.green, color.blue, color.alpha);
-}
-
-void CuteCosmicPlatformThemePrivate::rebuildPalette()
-{
-    if (!libcosmic_theme_should_apply_colors()) {
-        // NULL palette means that the active style dictates the colors
-        d_systemPalette.reset();
-        return;
-    }
-
-    CosmicPalette p;
-    libcosmic_theme_get_palette(&p);
-
-    QColor window = convertColor(p.window);
-    QColor windowText = convertColor(p.window_text);
-    QColor background = convertColor(p.background);
-    QColor text = convertColor(p.text);
-    QColor disabledBackground = convertColor(p.background_disabled);
-    QColor disabledText = convertColor(p.text_disabled);
-    QColor button = convertColor(p.button);
-    QColor buttonText = convertColor(p.button_text);
-    QColor accent = convertColor(p.accent);
-    QColor accentText = convertColor(p.accent_text);
-    QColor disabledAccent = convertColor(p.accent_disabled);
-    QColor tooltip = convertColor(p.tooltip);
-
-    // Bevel colors - same definition as in Fusion palette
-    QColor light = button.lighter(150);
-    QColor mid = button.darker(130);
-    QColor midLight = mid.lighter(110);
-    QColor dark = button.darker(150);
-
-    QColor placeholderText = text;
-    placeholderText.setAlphaF(0.5);
-
-    d_systemPalette = std::make_unique<QPalette>(
-        windowText, button, light, dark, mid, text, light, background, window);
-
-    d_systemPalette->setColor(QPalette::Midlight, midLight);
-    d_systemPalette->setColor(QPalette::ToolTipBase, tooltip);
-    d_systemPalette->setColor(QPalette::ToolTipText, windowText);
-    d_systemPalette->setColor(QPalette::HighlightedText, accentText);
-    d_systemPalette->setColor(QPalette::PlaceholderText, placeholderText);
-    d_systemPalette->setColor(QPalette::Link, accent);
-
-    d_systemPalette->setColor(QPalette::Disabled, QPalette::Base, disabledBackground);
-    d_systemPalette->setColor(QPalette::Disabled, QPalette::Text, disabledText);
-    d_systemPalette->setColor(QPalette::Disabled, QPalette::ButtonText, disabledText);
-
-    d_systemPalette->setColor(QPalette::Active, QPalette::ButtonText, buttonText);
-    d_systemPalette->setColor(QPalette::Inactive, QPalette::ButtonText, buttonText);
-
-    d_systemPalette->setColor(QPalette::Active, QPalette::Highlight, accent);
-    d_systemPalette->setColor(QPalette::Inactive, QPalette::Highlight, accent);
-    d_systemPalette->setColor(QPalette::Disabled, QPalette::Highlight, disabledAccent);
-
-    d_systemPalette->setColor(QPalette::Active, QPalette::Accent, accent);
-    d_systemPalette->setColor(QPalette::Inactive, QPalette::Accent, accent);
-    d_systemPalette->setColor(QPalette::Disabled, QPalette::Accent, disabledAccent);
 }
 
 CuteCosmicPlatformTheme::CuteCosmicPlatformTheme()
@@ -237,7 +176,10 @@ void CuteCosmicPlatformTheme::requestColorScheme(Qt::ColorScheme scheme)
 const QPalette* CuteCosmicPlatformTheme::palette(Palette type) const
 {
     if (type == QPlatformTheme::SystemPalette) {
-        return d_ptr->d_systemPalette.get();
+        return d_ptr->d_colorManager->systemPalette();
+    }
+    else if (type == QPlatformTheme::MenuPalette) {
+        return d_ptr->d_colorManager->menuPalette();
     }
     return nullptr;
 }
