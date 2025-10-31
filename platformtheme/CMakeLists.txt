@@ -7,6 +7,7 @@ endif()
 set(SOURCES
     cutecosmiccolormanager.cpp
     cutecosmicfiledialog.cpp
+    cutecosmiciconengine.cpp
     cutecosmictheme.cpp
     cutecosmicwatcher.cpp
     main.cpp

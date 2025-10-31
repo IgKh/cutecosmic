@@ -17,6 +17,7 @@
 #include "cutecosmictheme.h"
 #include "cutecosmiccolormanager.h"
 #include "cutecosmicfiledialog.h"
+#include "cutecosmiciconengine.h"
 #include "cutecosmicwatcher.h"
 
 #include "bindings.h"
@@ -32,6 +33,8 @@ static constexpr int DEFAULT_FONT_SIZE = QGenericUnixTheme::defaultSystemFontSiz
 // https://github.com/qt/qtbase/blob/6.9/src/gui/platform/unix/qgenericunixthemes.cpp#L78
 static constexpr int DEFAULT_FONT_SIZE = 9;
 #endif
+
+using namespace Qt::StringLiterals;
 
 static QString consumeRustString(char* value)
 {
@@ -162,17 +165,6 @@ QPlatformDialogHelper* CuteCosmicPlatformTheme::createPlatformDialogHelper(Dialo
     return QGenericUnixTheme::createPlatformDialogHelper(type);
 }
 
-Qt::ColorScheme CuteCosmicPlatformTheme::colorScheme() const
-{
-    bool dark = libcosmic_theme_is_dark();
-    return dark ? Qt::ColorScheme::Dark : Qt::ColorScheme::Light;
-}
-
-void CuteCosmicPlatformTheme::requestColorScheme(Qt::ColorScheme scheme)
-{
-    d_ptr->setColorScheme(scheme);
-}
-
 const QPalette* CuteCosmicPlatformTheme::palette(Palette type) const
 {
     if (type == QPlatformTheme::SystemPalette) {
@@ -200,8 +192,27 @@ QVariant CuteCosmicPlatformTheme::themeHint(ThemeHint hint) const
     if (hint == QPlatformTheme::SystemIconThemeName) {
         return consumeRustString(libcosmic_theme_icon_theme());
     }
+    else if (hint == QPlatformTheme::SystemIconFallbackThemeName) {
+        return "breeze"_L1;
+    }
 
     return QGenericUnixTheme::themeHint(hint);
+}
+
+QIconEngine* CuteCosmicPlatformTheme::createIconEngine(const QString& iconName) const
+{
+    return new CuteCosmicIconEngine(iconName);
+}
+
+Qt::ColorScheme CuteCosmicPlatformTheme::colorScheme() const
+{
+    bool dark = libcosmic_theme_is_dark();
+    return dark ? Qt::ColorScheme::Dark : Qt::ColorScheme::Light;
+}
+
+void CuteCosmicPlatformTheme::requestColorScheme(Qt::ColorScheme scheme)
+{
+    d_ptr->setColorScheme(scheme);
 }
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
