@@ -22,22 +22,36 @@
 
 CuteCosmicWatcher::CuteCosmicWatcher(QObject* parent)
     : QObject(parent)
+    , d_watcherToken(nullptr)
 {
     d_themeChangedEmitTimer = new QTimer(this);
     d_themeChangedEmitTimer->setSingleShot(true);
     d_themeChangedEmitTimer->setInterval(50);
     d_themeChangedEmitTimer->callOnTimeout(this, &CuteCosmicWatcher::themeChanged);
 
-    auto callback = [](void* data) {
-        CuteCosmicWatcher* self = reinterpret_cast<CuteCosmicWatcher*>(data);
-        QMetaObject::invokeMethod(self, "configurationChanged", Qt::QueuedConnection);
-    };
-    libcosmic_watcher_start(callback, reinterpret_cast<void*>(this));
+    QTimer::singleShot(0, this, &CuteCosmicWatcher::startWatching);
 }
 
 CuteCosmicWatcher::~CuteCosmicWatcher()
 {
-    libcosmic_watcher_stop();
+    if (d_watcherToken) {
+        libcosmic_watcher_stop(d_watcherToken);
+        d_watcherToken = nullptr;
+    }
+}
+
+void CuteCosmicWatcher::startWatching()
+{
+    if (d_watcherToken != nullptr) {
+        return;
+    }
+
+    auto callback = [](void* data) {
+        CuteCosmicWatcher* self = reinterpret_cast<CuteCosmicWatcher*>(data);
+        QMetaObject::invokeMethod(self, &CuteCosmicWatcher::configurationChanged, Qt::QueuedConnection);
+    };
+
+    d_watcherToken = libcosmic_watcher_start(callback, reinterpret_cast<void*>(this));
 }
 
 void CuteCosmicWatcher::configurationChanged()
