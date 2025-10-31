@@ -63,13 +63,15 @@ public:
     bool usePlatformNativeDialog(DialogType type) const override;
     QPlatformDialogHelper* createPlatformDialogHelper(DialogType type) const override;
 
-    Qt::ColorScheme colorScheme() const override;
-    void requestColorScheme(Qt::ColorScheme scheme) override;
-
     const QPalette* palette(Palette type) const override;
     const QFont* font(Font type) const override;
 
     QVariant themeHint(ThemeHint hint) const override;
+
+    QIconEngine* createIconEngine(const QString& iconName) const override;
+
+    Qt::ColorScheme colorScheme() const override;
+    void requestColorScheme(Qt::ColorScheme scheme) override;
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     Qt::ContrastPreference contrastPreference() const override;
