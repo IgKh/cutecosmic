@@ -18,6 +18,8 @@
 
 #include <QObject>
 
+struct CosmicWatcherToken;
+
 class QTimer;
 
 class CuteCosmicWatcher : public QObject
@@ -32,8 +34,10 @@ Q_SIGNALS:
     void themeChanged();
 
 private Q_SLOTS:
+    void startWatching();
     void configurationChanged();
 
 private:
     QTimer* d_themeChangedEmitTimer;
+    CosmicWatcherToken* d_watcherToken;
 };

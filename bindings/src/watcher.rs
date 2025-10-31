@@ -16,7 +16,6 @@
  */
 use std::{any::TypeId, cell::RefCell, ffi::c_void, rc::Rc, task::Poll};
 
-use atomic_refcell::AtomicRefCell;
 use cosmic::{
     config::CosmicTk,
     cosmic_config::{self, CosmicConfigEntry},
@@ -34,7 +33,9 @@ use cosmic::{
 };
 use cosmic_settings_daemon::CosmicSettingsDaemonProxy;
 
-static EXECUTOR_STOP: AtomicRefCell<Option<oneshot::Sender<()>>> = AtomicRefCell::new(None);
+pub struct CosmicWatcherToken {
+    stop_signal: oneshot::Sender<()>,
+}
 
 /// Very simple iced executor that does everything on the thread it is run on,
 /// blocking it until notified to stop
@@ -44,18 +45,8 @@ struct LocalExecutor {
 }
 
 impl LocalExecutor {
-    fn run(&mut self) {
-        let rx = {
-            let mut stop = EXECUTOR_STOP.borrow_mut();
-            if stop.is_some() {
-                panic!("Executor already running!");
-            }
-
-            let (tx, rx) = oneshot::channel::<()>();
-            *stop = Some(tx);
-            rx
-        };
-        let _ = self.pool.borrow_mut().run_until(rx);
+    fn run(&mut self, stop_rx: oneshot::Receiver<()>) {
+        let _ = self.pool.borrow_mut().run_until(stop_rx);
     }
 }
 
@@ -140,13 +131,14 @@ where
 pub extern "C" fn libcosmic_watcher_start(
     callback: extern "C" fn(*mut c_void) -> c_void,
     data: *mut c_void,
-) {
+) -> *mut CosmicWatcherToken {
     struct ThemeModeSubscription;
     struct DarkThemeSubscription;
     struct LightThemeSubscription;
     struct CosmicTkSubscription;
 
     let sender = CallbackSink { callback, data };
+    let (stop_tx, stop_rx) = oneshot::channel::<()>();
 
     std::thread::Builder::new()
         .name("CuteCosmicWatcher".into())
@@ -175,14 +167,18 @@ pub extern "C" fn libcosmic_watcher_start(
 
             rt.track(into_recipes(sub));
 
-            executor.run();
+            executor.run(stop_rx);
         })
         .unwrap();
+
+    let token = CosmicWatcherToken {
+        stop_signal: stop_tx,
+    };
+    Box::into_raw(Box::new(token))
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn libcosmic_watcher_stop() {
-    if let Some(tx) = EXECUTOR_STOP.borrow_mut().take() {
-        let _ = tx.send(());
-    }
+pub extern "C" fn libcosmic_watcher_stop(token: *mut CosmicWatcherToken) {
+    let token = unsafe { Box::from_raw(token) };
+    let _ = token.stop_signal.send(());
 }
