@@ -32,7 +32,7 @@ void CuteCosmicColorManager::reloadThemeColors()
 
 static QColor convertColor(const CosmicColor& color)
 {
-    return qRgba(color.red, color.green, color.blue, color.alpha);
+    return QColor::fromRgba(qRgba(color.red, color.green, color.blue, color.alpha));
 }
 
 static QColor withAlpha(QColor c, qreal factor)
@@ -78,6 +78,7 @@ void CuteCosmicColorManager::rebuildPalettes()
         // NULL palette means that the active style dictates the colors
         d_systemPalette.reset();
         d_menuPalette.reset();
+        d_buttonPalette.reset();
         return;
     }
 
@@ -94,6 +95,9 @@ void CuteCosmicColorManager::rebuildPalettes()
     QColor component = convertColor(p.component);
     QColor componentText = convertColor(p.component_text);
     QColor disabledComponentText = convertColor(p.component_text_disabled);
+    QColor button = convertColor(p.button);
+    QColor buttonText = convertColor(p.button_text);
+    QColor disabledButtonText = convertColor(p.button_text_disabled);
     QColor accent = convertColor(p.accent);
     QColor accentText = convertColor(p.accent_text);
     QColor disabledAccent = convertColor(p.accent_disabled);
@@ -142,6 +146,24 @@ void CuteCosmicColorManager::rebuildPalettes()
 
     d_menuPalette = std::make_unique<QPalette>(*d_systemPalette);
     d_menuPalette->setColor(QPalette::Disabled, QPalette::Text, menuDisabledText);
+    d_menuPalette->setColor(QPalette::Disabled, QPalette::ButtonText, menuDisabledText);
+
+    // Push button palette - need to alpha-blend the button background color over
+    // the window background to imitate how libcosmic renders
+    QColor buttonBackground = alphaBlend(button, window);
+    QColor buttonDisabledText = alphaBlend(withAlpha(disabledButtonText, 0.5), buttonBackground);
+    BevelColors buttonBevel = generateBevelColors(buttonBackground);
+
+    d_buttonPalette = std::make_unique<QPalette>(*d_systemPalette);
+    d_buttonPalette->setColor(QPalette::Button, buttonBackground);
+    d_buttonPalette->setColor(QPalette::Light, buttonBevel.light);
+    d_buttonPalette->setColor(QPalette::Mid, buttonBevel.mid);
+    d_buttonPalette->setColor(QPalette::Midlight, buttonBevel.midLight);
+    d_buttonPalette->setColor(QPalette::Dark, buttonBevel.dark);
+
+    d_buttonPalette->setColor(QPalette::Active, QPalette::ButtonText, buttonText);
+    d_buttonPalette->setColor(QPalette::Inactive, QPalette::ButtonText, buttonText);
+    d_buttonPalette->setColor(QPalette::Disabled, QPalette::ButtonText, buttonDisabledText);
 }
 
 #include "moc_cutecosmiccolormanager.cpp"

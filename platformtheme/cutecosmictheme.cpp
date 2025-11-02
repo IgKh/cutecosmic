@@ -170,8 +170,11 @@ const QPalette* CuteCosmicPlatformTheme::palette(Palette type) const
     if (type == QPlatformTheme::SystemPalette) {
         return d_ptr->d_colorManager->systemPalette();
     }
-    else if (type == QPlatformTheme::MenuPalette) {
+    else if (type == QPlatformTheme::MenuPalette || type == QPlatformTheme::ToolButtonPalette) {
         return d_ptr->d_colorManager->menuPalette();
+    }
+    else if (type == QPlatformTheme::ButtonPalette) {
+        return d_ptr->d_colorManager->buttonPalette();
     }
     return nullptr;
 }

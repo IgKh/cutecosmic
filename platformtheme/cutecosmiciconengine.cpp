@@ -152,14 +152,7 @@ QPixmap CuteCosmicIconEngine::renderSvgIcon(const QString& path, const QSize& si
 
     QImage image = reader.read().convertToFormat(QImage::Format_ARGB32);
     if (isSymbolic(d_iconInfo.iconName) || isKdeSymbolicIcon(data)) {
-        // FIXME: Active icon tint should be HighlightedText really, but
-        // currently hovered menu items are painted with the highlight
-        // color but hovered toolbar items (and other buttons) don't, and
-        // that looks bad. Revisit with button palettes.
-        QColor tint = (mode == QIcon::Active)
-            ? appPalette.color(QPalette::Active, QPalette::Text)
-            : appPalette.color(QPalette::Active, QPalette::Text);
-
+        QColor tint = appPalette.color(QPalette::Active, QPalette::Text);
         recolorIcon(image, tint);
     }
 
