@@ -131,6 +131,9 @@ pub struct CosmicPalette {
     component: CosmicColor,
     component_text: CosmicColor,
     component_text_disabled: CosmicColor,
+    button: CosmicColor,
+    button_text: CosmicColor,
+    button_text_disabled: CosmicColor,
     tooltip: CosmicColor,
     accent: CosmicColor,
     accent_text: CosmicColor,
@@ -157,6 +160,9 @@ pub extern "C" fn libcosmic_theme_get_palette(target: *mut CosmicPalette) {
     target.component = (&cosmic.primary.component.base).into();
     target.component_text = (&cosmic.primary.component.on).into();
     target.component_text_disabled = (&cosmic.primary.component.on_disabled).into();
+    target.button = (&cosmic.button.base).into();
+    target.button_text = (&cosmic.button.on).into();
+    target.button_text_disabled = (&cosmic.button.on_disabled).into();
     target.accent = (&cosmic.accent.base).into();
     target.accent_text = (&cosmic.accent.on).into();
     target.accent_disabled = (&cosmic.accent.disabled).into();

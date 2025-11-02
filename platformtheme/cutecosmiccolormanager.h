@@ -33,10 +33,12 @@ public:
 
     const QPalette* systemPalette() const { return d_systemPalette.get(); }
     const QPalette* menuPalette() const { return d_menuPalette.get(); }
+    const QPalette* buttonPalette() const { return d_buttonPalette.get(); }
 
 private:
     void rebuildPalettes();
 
     std::unique_ptr<QPalette> d_systemPalette;
     std::unique_ptr<QPalette> d_menuPalette;
+    std::unique_ptr<QPalette> d_buttonPalette;
 };
