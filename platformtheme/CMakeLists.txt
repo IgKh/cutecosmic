@@ -1,4 +1,4 @@
-find_package(Qt6 REQUIRED COMPONENTS Gui DBus)
+find_package(Qt6 REQUIRED COMPONENTS Gui QuickControls2 DBus)
 
 if(Qt6_VERSION VERSION_GREATER_EQUAL 6.9.0)
     find_package(Qt6 COMPONENTS GuiPrivate)
@@ -21,7 +21,7 @@ qt_add_plugin(cutecosmictheme
 target_compile_options(cutecosmictheme PRIVATE -Wall -Wextra -pedantic)
 target_compile_definitions(cutecosmictheme PRIVATE QT_NO_CAST_FROM_ASCII QT_NO_KEYWORDS)
 
-target_link_libraries(cutecosmictheme PRIVATE Qt::GuiPrivate Qt::DBus bindings)
+target_link_libraries(cutecosmictheme PRIVATE Qt::GuiPrivate Qt::QuickControls2 Qt::DBus bindings)
 
 # Find out where to install the plugin
 find_package(Qt6 COMPONENTS CoreTools QUIET CONFIG)

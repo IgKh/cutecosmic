@@ -40,6 +40,7 @@ public:
     void setColorScheme(Qt::ColorScheme scheme);
 
 private Q_SLOTS:
+    void setQtQuickStyle();
     void themeChanged();
 
 private:
