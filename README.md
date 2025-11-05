@@ -58,6 +58,12 @@ QT_QPA_PLATFORMTHEME=cosmic /path/to/a/qt/app
 
 If not working, troubleshoot by setting the `QT_DEBUG_PLUGINS` environment variable and watch the log traces to see if `libcutecosmictheme.so` is available and loaded.
 
+## Configuration
+
+Most of the configuration is done using the options already present in the COSMIC Settings application.
+
+CuteCosmic will by default use the Breeze widgets style engine if installed, or the built-in Fusion style otherwise. If you want it to use another style by default (e.g Kvantum), you can set the `CUTECOSMIC_DEFAULT_STYLE` environment variable in your profile.
+
 ## Contributing
 
 Issue reports and code contributions are gratefully accepted. Please do not send unsolicited Pull Requests, please first propose patch ideas and plans in the relevant issue (or open an issue if one doesn't already exists).

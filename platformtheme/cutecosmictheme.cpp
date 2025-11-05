@@ -198,6 +198,14 @@ QVariant CuteCosmicPlatformTheme::themeHint(ThemeHint hint) const
     else if (hint == QPlatformTheme::SystemIconFallbackThemeName) {
         return "breeze"_L1;
     }
+    else if (hint == QPlatformTheme::StyleNames) {
+        QStringList styles;
+        if (qEnvironmentVariableIsSet("CUTECOSMIC_DEFAULT_STYLE")) {
+            styles << qEnvironmentVariable("CUTECOSMIC_DEFAULT_STYLE");
+        }
+        styles << "Breeze"_L1 << "Fusion"_L1;
+        return styles;
+    }
 
     return QGenericUnixTheme::themeHint(hint);
 }
