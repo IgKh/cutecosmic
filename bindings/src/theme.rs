@@ -140,6 +140,13 @@ pub struct CosmicPalette {
     accent_disabled: CosmicColor,
 }
 
+#[repr(C)]
+pub struct CosmicExtendedPalette {
+    success: CosmicColor,
+    destructive: CosmicColor,
+    warning: CosmicColor,
+}
+
 #[unsafe(no_mangle)]
 pub extern "C" fn libcosmic_theme_get_palette(target: *mut CosmicPalette) {
     if target.is_null() {
@@ -169,6 +176,21 @@ pub extern "C" fn libcosmic_theme_get_palette(target: *mut CosmicPalette) {
 
     // https://github.com/pop-os/libcosmic/blob/76c1897d4d9a637c8aa4016483bf05fec5f10ebd/src/theme/style/iced.rs#L584
     target.tooltip = (&cosmic.palette.neutral_2).into();
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn libcosmic_theme_get_extended_palette(target: *mut CosmicExtendedPalette) {
+    if target.is_null() {
+        return;
+    }
+
+    let target: &mut CosmicExtendedPalette = unsafe { &mut *target };
+    let theme = current_theme();
+    let cosmic = theme.cosmic();
+
+    target.success = (&cosmic.palette.bright_green).into();
+    target.destructive = (&cosmic.palette.bright_red).into();
+    target.warning = (&cosmic.palette.bright_orange).into();
 }
 
 #[unsafe(no_mangle)]
