@@ -25,6 +25,7 @@
 #include <qpa/qwindowsysteminterface.h>
 
 #include <QFont>
+#include <QLoggingCategory>
 #include <QPalette>
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
@@ -33,6 +34,8 @@ static constexpr int DEFAULT_FONT_SIZE = QGenericUnixTheme::defaultSystemFontSiz
 // https://github.com/qt/qtbase/blob/6.9/src/gui/platform/unix/qgenericunixthemes.cpp#L78
 static constexpr int DEFAULT_FONT_SIZE = 9;
 #endif
+
+Q_LOGGING_CATEGORY(lcCuteCosmic, "cutecosmic", QtWarningMsg)
 
 using namespace Qt::StringLiterals;
 

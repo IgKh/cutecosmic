@@ -21,6 +21,7 @@
 #include <memory>
 
 class QPalette;
+class QTemporaryFile;
 
 class CuteCosmicColorManager : QObject
 {
@@ -37,8 +38,11 @@ public:
 
 private:
     void rebuildPalettes();
+    void rebuildKdeColors();
 
     std::unique_ptr<QPalette> d_systemPalette;
     std::unique_ptr<QPalette> d_menuPalette;
     std::unique_ptr<QPalette> d_buttonPalette;
+
+    QTemporaryFile* d_kdeColorsFile;
 };
