@@ -24,8 +24,11 @@
 
 #include <qpa/qwindowsysteminterface.h>
 
+#include <QDir>
 #include <QFont>
+#include <QLibraryInfo>
 #include <QPalette>
+#include <QQuickStyle>
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
 static constexpr int DEFAULT_FONT_SIZE = QGenericUnixTheme::defaultSystemFontSize;
@@ -95,6 +98,7 @@ CuteCosmicPlatformThemePrivate::CuteCosmicPlatformThemePrivate()
     d_colorManager = new CuteCosmicColorManager(this);
 
     reloadTheme();
+    setQtQuickStyle();
 }
 
 void CuteCosmicPlatformThemePrivate::reloadTheme()
@@ -124,6 +128,25 @@ void CuteCosmicPlatformThemePrivate::setColorScheme(Qt::ColorScheme scheme)
     }
     d_requestedScheme = scheme;
     themeChanged();
+}
+
+void CuteCosmicPlatformThemePrivate::setQtQuickStyle()
+{
+    // Follow the lead of plasma-integration here... If there is a Qt Quick
+    // Controls style (which isn't Fusion) already set, do nothing. But if
+    // there isn't, set KDE's qqc2-desktop-style if it is installed. Some
+    // Kirigami apps (e.g plasma-systemmonitor) expect it to be set for them,
+    // and if not they are visually broken. This isn't the nicest way, but
+    // as they say, there is safety in numbers.
+    if (!QQuickStyle::name().isEmpty() && QQuickStyle::name() != "Fusion"_L1) {
+        return;
+    }
+
+    QString qmlPath = QLibraryInfo::path(QLibraryInfo::QmlImportsPath);
+
+    if (QDir(qmlPath + "/org/kde/desktop"_L1).exists()) {
+        QQuickStyle::setStyle("org.kde.desktop"_L1);
+    }
 }
 
 void CuteCosmicPlatformThemePrivate::themeChanged()
