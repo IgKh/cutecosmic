@@ -37,5 +37,7 @@ else()
     )
 
     message(STATUS "Installing plugin to ${QT_INSTALL_PLUGINS}")
+
+    set_target_properties(cutecosmictheme PROPERTIES INSTALL_RPATH_USE_LINK_PATH TRUE)
     install(TARGETS cutecosmictheme DESTINATION ${QT_INSTALL_PLUGINS}/platformthemes)
 endif()
