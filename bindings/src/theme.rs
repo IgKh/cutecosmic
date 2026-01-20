@@ -58,6 +58,7 @@ pub unsafe extern "C" fn libcosmic_theme_free_string(ptr: *mut c_char) {
 }
 
 #[repr(C)]
+#[derive(Debug, Copy, Clone)]
 #[allow(dead_code)]
 pub enum CosmicThemeKind {
     SystemPreference,
@@ -75,7 +76,10 @@ pub extern "C" fn libcosmic_theme_load(kind: CosmicThemeKind) {
 
     let tk = CosmicTk::config()
         .ok()
-        .and_then(|c| CosmicTk::get_entry(&c).ok())
+        .map(|c| match CosmicTk::get_entry(&c) {
+            Ok(tk) => tk,
+            Err((_, partial)) => partial,
+        })
         .unwrap_or_default();
 
     *CURRENT_THEME.borrow_mut() = Some(theme);
