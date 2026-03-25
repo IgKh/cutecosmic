@@ -203,7 +203,7 @@ QVariantMap CuteCosmicFileDialog::buildPortalOptions(Qt::WindowModality windowMo
     QVariantMap portalOptions;
 
     // handle_token (s)
-    QString token = QUuid::createUuid().toString(QUuid::WithoutBraces).remove(QLatin1Char('-'));
+    QString token = QUuid::createUuid().toString(QUuid::Id128);
     portalOptions["handle_token"_L1] = "cc"_L1 + token;
 
     // accept_label (s)
