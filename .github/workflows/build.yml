@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        qt-version: ['6.8.*', '6.9.*', '6.10.*']
+        qt-version: ['6.8.*', '6.9.*', '6.10.*', '6.11.*']
   
     runs-on: ubuntu-latest
 
