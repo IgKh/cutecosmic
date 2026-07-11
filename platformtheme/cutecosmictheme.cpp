@@ -38,6 +38,8 @@ static constexpr int DEFAULT_FONT_SIZE = QGenericUnixTheme::defaultSystemFontSiz
 static constexpr int DEFAULT_FONT_SIZE = 9;
 #endif
 
+static constexpr int MINI_FONT_SIZE = 8;
+
 Q_LOGGING_CATEGORY(lcCuteCosmic, "cutecosmic", QtWarningMsg)
 
 using namespace Qt::StringLiterals;
@@ -122,6 +124,11 @@ void CuteCosmicPlatformThemePrivate::reloadTheme()
 
     d_interfaceFont = loadFont(CosmicFontKind::Interface);
     d_monospaceFont = loadFont(CosmicFontKind::Monospace);
+
+    if (d_interfaceFont) {
+        d_miniFont = std::make_unique<QFont>(*d_interfaceFont);
+        d_miniFont->setPointSize(MINI_FONT_SIZE);
+    }
 }
 
 void CuteCosmicPlatformThemePrivate::setColorScheme(Qt::ColorScheme scheme)
@@ -218,6 +225,9 @@ const QFont* CuteCosmicPlatformTheme::font(Font type) const
     }
     if (type == QPlatformTheme::FixedFont) {
         return d_ptr->d_monospaceFont.get();
+    }
+    if (type == QPlatformTheme::MiniFont) {
+        return d_ptr->d_miniFont.get();
     }
     return nullptr;
 }
