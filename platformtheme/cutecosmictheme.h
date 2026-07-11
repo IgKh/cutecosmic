@@ -53,6 +53,7 @@ private:
     Qt::ColorScheme d_requestedScheme;
     std::unique_ptr<QFont> d_interfaceFont;
     std::unique_ptr<QFont> d_monospaceFont;
+    std::unique_ptr<QFont> d_miniFont;
 };
 
 class CuteCosmicPlatformTheme : public QGenericUnixTheme
