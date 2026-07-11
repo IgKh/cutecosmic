@@ -150,6 +150,12 @@ void CuteCosmicPlatformThemePrivate::setQtQuickStyle()
     if (QDir(qmlPath + "/org/kde/desktop"_L1).exists()) {
         QQuickStyle::setStyle("org.kde.desktop"_L1);
     }
+
+    if (QQuickStyle::name() == "org.kde.desktop"_L1) {
+        // Workaround in qqc2-desktop-style to have it use our icon engine
+        // See https://invent.kde.org/frameworks/qqc2-desktop-style/-/work_items/16
+        qApp->setProperty("QQC2_DESKTOP_USE_QICON_FROM_THEME", true);
+    }
 }
 
 void CuteCosmicPlatformThemePrivate::themeChanged()
