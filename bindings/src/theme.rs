@@ -161,16 +161,19 @@ pub extern "C" fn libcosmic_theme_get_palette(target: *mut CosmicPalette) {
     let theme = current_theme();
     let cosmic = theme.cosmic();
 
-    target.window = (&cosmic.background.base).into();
-    target.window_text = (&cosmic.background.on).into();
-    target.window_text_disabled = (&cosmic.background.component.on_disabled).into();
-    target.window_component = (&cosmic.background.component.base).into();
-    target.background = (&cosmic.primary.base).into();
-    target.text = (&cosmic.primary.on).into();
-    target.text_disabled = (&cosmic.primary.component.on_disabled).into();
-    target.component = (&cosmic.primary.component.base).into();
-    target.component_text = (&cosmic.primary.component.on).into();
-    target.component_text_disabled = (&cosmic.primary.component.on_disabled).into();
+    let bg = cosmic.background(false);
+    let primary = cosmic.primary(false);
+
+    target.window = (&bg.base).into();
+    target.window_text = (&bg.on).into();
+    target.window_text_disabled = (&bg.component.on_disabled).into();
+    target.window_component = (&bg.component.base).into();
+    target.background = (&primary.base).into();
+    target.text = (&primary.on).into();
+    target.text_disabled = (&primary.component.on_disabled).into();
+    target.component = (&primary.component.base).into();
+    target.component_text = (&primary.component.on).into();
+    target.component_text_disabled = (&primary.component.on_disabled).into();
     target.button = (&cosmic.button.base).into();
     target.button_text = (&cosmic.button.on).into();
     target.button_text_disabled = (&cosmic.button.on_disabled).into();

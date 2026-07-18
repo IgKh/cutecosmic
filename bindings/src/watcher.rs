@@ -29,9 +29,9 @@ use cosmic::{
             task::SpawnExt,
         },
     },
-    iced_futures::subscription::into_recipes,
 };
 use cosmic_settings_daemon::CosmicSettingsDaemonProxy;
+use iced_futures::{Runtime, subscription::into_recipes};
 
 pub struct CosmicWatcherToken {
     stop_signal: oneshot::Sender<()>,
@@ -62,8 +62,12 @@ impl Executor for LocalExecutor {
         })
     }
 
-    fn spawn(&self, future: impl Future<Output = ()> + cosmic::iced_futures::MaybeSend + 'static) {
+    fn spawn(&self, future: impl Future<Output = ()> + iced_futures::MaybeSend + 'static) {
         self.pool.borrow().spawner().spawn(future).unwrap();
+    }
+
+    fn block_on<T>(&self, future: impl Future<Output = T>) -> T {
+        block_on(future)
     }
 }
 
@@ -162,8 +166,7 @@ pub extern "C" fn libcosmic_watcher_start(
             ]);
 
             let mut executor = LocalExecutor::new().unwrap();
-            let mut rt: cosmic::iced_futures::Runtime<_, _, ()> =
-                cosmic::iced_futures::Runtime::new(executor.clone(), sender);
+            let mut rt = Runtime::new(executor.clone(), sender);
 
             rt.track(into_recipes(sub));
 
