@@ -20,10 +20,12 @@
 
 #include <QtGui/private/qiconloader_p.h>
 
+class CuteCosmicColorManager;
+
 class CuteCosmicIconEngine : public QIconEngine
 {
 public:
-    CuteCosmicIconEngine(const QString& iconName);
+    CuteCosmicIconEngine(const QString& iconName, CuteCosmicColorManager* colorManager);
 
     QIconEngine* clone() const override;
 
@@ -41,4 +43,5 @@ private:
     QString bestIconFileForSize(int size, qreal scale);
 
     QThemeIconInfo d_iconInfo;
+    CuteCosmicColorManager* d_colorManager;
 };

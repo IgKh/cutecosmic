@@ -36,13 +36,17 @@ public:
     const QPalette* menuPalette() const { return d_menuPalette.get(); }
     const QPalette* buttonPalette() const { return d_buttonPalette.get(); }
 
+    QString iconCss() const { return d_iconCss; }
+
 private:
     void rebuildPalettes();
     void rebuildKdeColors();
+    void rebuildKdeIconCss();
 
     std::unique_ptr<QPalette> d_systemPalette;
     std::unique_ptr<QPalette> d_menuPalette;
     std::unique_ptr<QPalette> d_buttonPalette;
 
     QTemporaryFile* d_kdeColorsFile;
+    QString d_iconCss;
 };
