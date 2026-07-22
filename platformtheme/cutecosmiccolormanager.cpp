@@ -52,6 +52,7 @@ void CuteCosmicColorManager::reloadThemeColors()
 {
     rebuildPalettes();
     rebuildKdeColors();
+    rebuildKdeIconCss();
 }
 
 static QColor convertColor(const CosmicColor& color)
@@ -375,6 +376,33 @@ void CuteCosmicColorManager::rebuildKdeColors()
     if (saveFile.commit()) {
         QCoreApplication::instance()->setProperty("KDE_COLOR_SCHEME_PATH", d_kdeColorsFile->fileName());
     }
+}
+
+void CuteCosmicColorManager::rebuildKdeIconCss()
+{
+    Q_ASSERT(d_systemPalette.get() != nullptr);
+
+    CosmicExtendedPalette ep;
+    libcosmic_theme_get_extended_palette(&ep);
+
+    QColor windowText = d_systemPalette->color(QPalette::Active, QPalette::WindowText);
+    QColor windowBackground = d_systemPalette->color(QPalette::Active, QPalette::Window);
+    QColor highlightedText = d_systemPalette->color(QPalette::Active, QPalette::HighlightedText);
+    QColor accent = d_systemPalette->color(QPalette::Active, QPalette::Accent);
+    QColor negative = convertColor(ep.destructive);
+    QColor neutral = convertColor(ep.warning);
+    QColor positive = convertColor(ep.success);
+
+    d_iconCss.clear();
+    QTextStream stream { &d_iconCss };
+
+    stream << ".ColorScheme-Text{ color:" << windowText.name() << "; } ";
+    stream << ".ColorScheme-Background{ color:" << windowBackground.name() << "; } ";
+    stream << ".ColorScheme-HighlightedText{ color:" << highlightedText.name() << "; } ";
+    stream << ".ColorScheme-Accent{ color:" << accent.name() << "; }";
+    stream << ".ColorScheme-PositiveText{ color:" << positive.name() << "; } ";
+    stream << ".ColorScheme-NeutralText{ color:" << neutral.name() << "; } ";
+    stream << ".ColorScheme-NegativeText{ color:" << negative.name() << "; } ";
 }
 
 #include "moc_cutecosmiccolormanager.cpp"

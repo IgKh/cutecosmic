@@ -1,4 +1,5 @@
 #include "cutecosmiciconengine.h"
+#include "cutecosmiccolormanager.h"
 
 #include <QtGui/private/qguiapplication_p.h>
 
@@ -14,14 +15,15 @@
 
 using namespace Qt::Literals;
 
-CuteCosmicIconEngine::CuteCosmicIconEngine(const QString& iconName)
+CuteCosmicIconEngine::CuteCosmicIconEngine(const QString& iconName, CuteCosmicColorManager* colorManager)
     : d_iconInfo(QIconLoader::instance()->loadIcon(iconName))
+    , d_colorManager(colorManager)
 {
 }
 
 QIconEngine* CuteCosmicIconEngine::clone() const
 {
-    return new CuteCosmicIconEngine(d_iconInfo.iconName);
+    return new CuteCosmicIconEngine(d_iconInfo.iconName, d_colorManager);
 }
 
 QString CuteCosmicIconEngine::key() const
@@ -81,31 +83,44 @@ static bool isSymbolic(const QString& iconName)
         || iconName.endsWith("-symbolic-rtl"_L1);
 }
 
-static bool isKdeSymbolicIcon(const QByteArray& svg)
+static bool isOnKdeStylesheetElement(const QXmlStreamReader& reader)
 {
-    // Breeze icons are mostly symbolic, but not always found as such because
-    // of the internal symlinks in the theme. Furthermore, the way that KDE
-    // symbolic icons are re-colored is by a stylesheet embedded into the icon
-    // itself, which is replaced by KIconLoader prior to rendering. Try to
-    // identify this stylesheet.
-    QXmlStreamReader reader { svg };
+    return reader.isStartElement()
+        && reader.name() == "style"_L1
+        && reader.attributes().value("type"_L1) == "text/css"_L1
+        && reader.attributes().value("id"_L1) == "current-color-scheme"_L1;
+}
+
+static bool preprocessSvgIcon(QIODevice* in, QIODevice* out, const QString& iconCss)
+{
+    QXmlStreamReader reader { in };
+    QXmlStreamWriter writer { out };
+
+    bool isKdeSymbolic = false;
 
     while (!reader.atEnd()) {
         reader.readNext();
         if (reader.error() != QXmlStreamReader::NoError) {
-            return false;
+            break;
         }
 
-        bool isBreezeStylesheet = reader.isStartElement()
-            && reader.name() == "style"_L1
-            && reader.attributes().value("type"_L1) == "text/css"_L1
-            && reader.attributes().value("id"_L1) == "current-color-scheme"_L1;
+        if (isOnKdeStylesheetElement(reader)) {
+            writer.writeStartElement("style");
+            writer.writeAttributes(reader.attributes());
+            writer.writeCharacters(iconCss);
+            writer.writeEndElement();
 
-        if (isBreezeStylesheet) {
-            return true;
+            while (reader.tokenType() != QXmlStreamReader::EndElement && reader.error() == QXmlStreamReader::NoError) {
+                reader.readNext();
+            }
+            isKdeSymbolic = true;
+        }
+        else {
+            writer.writeCurrentToken(reader);
         }
     }
-    return false;
+
+    return isKdeSymbolic;
 }
 
 static void recolorIcon(QImage& image, const QColor& color)
@@ -144,14 +159,19 @@ QPixmap CuteCosmicIconEngine::renderSvgIcon(const QString& path, const QSize& si
         return QPixmap();
     }
 
-    QByteArray data = file.readAll();
+    QBuffer buffer;
+    if (!buffer.open(QBuffer::ReadWrite)) {
+        return QPixmap();
+    }
 
-    QBuffer buffer { &data };
+    bool isKdeSymbolic = preprocessSvgIcon(&file, &buffer, d_colorManager->iconCss());
+    buffer.seek(0);
+
     QImageReader reader { &buffer, "svg" };
     reader.setScaledSize(size);
 
     QImage image = reader.read().convertToFormat(QImage::Format_ARGB32);
-    if (isSymbolic(d_iconInfo.iconName) || isKdeSymbolicIcon(data)) {
+    if (isSymbolic(d_iconInfo.iconName) && !isKdeSymbolic) {
         QColor tint = appPalette.color(QPalette::Active, QPalette::Text);
         recolorIcon(image, tint);
     }

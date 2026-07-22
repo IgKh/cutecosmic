@@ -254,7 +254,7 @@ QVariant CuteCosmicPlatformTheme::themeHint(ThemeHint hint) const
 
 QIconEngine* CuteCosmicPlatformTheme::createIconEngine(const QString& iconName) const
 {
-    return new CuteCosmicIconEngine(iconName);
+    return new CuteCosmicIconEngine(iconName, d_ptr->d_colorManager);
 }
 
 Qt::ColorScheme CuteCosmicPlatformTheme::colorScheme() const
