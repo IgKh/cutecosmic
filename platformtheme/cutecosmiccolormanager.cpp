@@ -380,6 +380,11 @@ void CuteCosmicColorManager::rebuildKdeColors()
 
 void CuteCosmicColorManager::rebuildKdeIconCss()
 {
+    if (!libcosmic_theme_should_apply_colors()) {
+        d_iconCss.clear();
+        return;
+    }
+
     Q_ASSERT(d_systemPalette.get() != nullptr);
 
     CosmicExtendedPalette ep;
