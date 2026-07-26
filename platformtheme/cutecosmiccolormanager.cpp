@@ -52,7 +52,20 @@ void CuteCosmicColorManager::reloadThemeColors()
 {
     rebuildPalettes();
     rebuildKdeColors();
+
+    // Delay creation of icon re-coloring CSS until later, since it may depend
+    // on the effective application palette.
+    d_iconCss.clear();
+}
+
+QString CuteCosmicColorManager::iconCss()
+{
+    if (!d_iconCss.isEmpty()) {
+        return d_iconCss;
+    }
+
     rebuildKdeIconCss();
+    return d_iconCss;
 }
 
 static QColor convertColor(const CosmicColor& color)
@@ -380,20 +393,19 @@ void CuteCosmicColorManager::rebuildKdeColors()
 
 void CuteCosmicColorManager::rebuildKdeIconCss()
 {
-    if (!libcosmic_theme_should_apply_colors()) {
-        d_iconCss.clear();
-        return;
+    QPalette systemPalette;
+    if (libcosmic_theme_should_apply_colors()) {
+        Q_ASSERT(d_systemPalette.get() != nullptr);
+        systemPalette = *d_systemPalette;
     }
-
-    Q_ASSERT(d_systemPalette.get() != nullptr);
 
     CosmicExtendedPalette ep;
     libcosmic_theme_get_extended_palette(&ep);
 
-    QColor windowText = d_systemPalette->color(QPalette::Active, QPalette::WindowText);
-    QColor windowBackground = d_systemPalette->color(QPalette::Active, QPalette::Window);
-    QColor highlightedText = d_systemPalette->color(QPalette::Active, QPalette::HighlightedText);
-    QColor accent = d_systemPalette->color(QPalette::Active, QPalette::Accent);
+    QColor windowText = systemPalette.color(QPalette::Active, QPalette::WindowText);
+    QColor windowBackground = systemPalette.color(QPalette::Active, QPalette::Window);
+    QColor highlightedText = systemPalette.color(QPalette::Active, QPalette::HighlightedText);
+    QColor accent = systemPalette.color(QPalette::Active, QPalette::Accent);
     QColor negative = convertColor(ep.destructive);
     QColor neutral = convertColor(ep.warning);
     QColor positive = convertColor(ep.success);
