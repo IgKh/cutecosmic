@@ -36,7 +36,7 @@ public:
     const QPalette* menuPalette() const { return d_menuPalette.get(); }
     const QPalette* buttonPalette() const { return d_buttonPalette.get(); }
 
-    QString iconCss() const { return d_iconCss; }
+    QString iconCss();
 
 private:
     void rebuildPalettes();
