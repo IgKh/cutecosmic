@@ -37,7 +37,19 @@ KDE Discover rocking the COSMIC version of the [Catppuccin](https://github.com/c
 
 ## Installation
 
-CuteCosmic must currently be built from source. To do so, you'll need a C++ compiler, the most recent Rust stable compiler, CMake and development files (headers, libraries and tools) for Qt 6.
+### From a distribution package
+
+Some GNU/Linux distributions package CuteCosmic in their repositories. Installing it through the respective package manager tool will apply CuteCosmic to the distribution's own system-wide build of Qt and KDE, and therefore most Qt applications installed from distribution repositories.
+
+For your convenience, see the list of known distribution packages as tracked by Repology:
+
+[![Packaging status](https://repology.org/badge/vertical-allrepos/cutecosmic.svg)](https://repology.org/project/cutecosmic/versions)
+
+Note that these are not maintained directly by this project, and therefore their quality cannot be vouched for.
+
+### From source
+
+If your distribution doesn't package CuteCosmic, or you want to use it with a build of Qt other than the system-wide one, it must be built from source. To do so, you'll need a C++ compiler, the most recent Rust stable compiler, CMake and development files (headers, libraries, and tools) for Qt 6.
 
 The project aims to support only the last three released minor versions of Qt, as well as the most recent Qt 6 LTS series (if it is not one of the three). Currently this means Qt 6.8, 6.9, 6.10 and 6.11.
 
@@ -79,7 +91,7 @@ Issue reports and code contributions are gratefully accepted. Please do not send
 
 ## License
 
-Copyright 2025 Igor Khanin.
+Copyright 2025 - 2026 Igor Khanin.
 
 Made available under the [GPL v3](https://choosealicense.com/licenses/gpl-3.0/) license.
 
