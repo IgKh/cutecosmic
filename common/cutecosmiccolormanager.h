@@ -20,15 +20,16 @@
 
 #include <memory>
 
+class QColor;
 class QPalette;
 class QTemporaryFile;
 
-class CuteCosmicColorManager : QObject
+class CuteCosmicColorManager : public QObject
 {
     Q_OBJECT
 
 public:
-    CuteCosmicColorManager(QObject* parent = nullptr);
+    static CuteCosmicColorManager* instance();
 
     void reloadThemeColors();
 
@@ -36,12 +37,15 @@ public:
     const QPalette* menuPalette() const { return d_menuPalette.get(); }
     const QPalette* buttonPalette() const { return d_buttonPalette.get(); }
 
-    QString iconCss();
+    QString iconCss(const QColor& tint);
 
 private:
+    CuteCosmicColorManager(QObject* parent = nullptr);
+
     void rebuildPalettes();
     void rebuildKdeColors();
-    void rebuildKdeIconCss();
+
+    QString buildKdeIconCss(const QColor& tint);
 
     std::unique_ptr<QPalette> d_systemPalette;
     std::unique_ptr<QPalette> d_menuPalette;

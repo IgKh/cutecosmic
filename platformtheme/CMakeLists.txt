@@ -21,7 +21,8 @@ target_link_libraries(cutecosmictheme PRIVATE cutecosmiccommon Qt::QuickControls
 if(QT_INSTALL_PLUGINS)
     set_target_properties(cutecosmictheme PROPERTIES
         INSTALL_RPATH_USE_LINK_PATH TRUE
-        INSTALL_RPATH ${CUTECOSMIC_PRIVATE_LIBDIR})
+        INSTALL_RPATH ${CUTECOSMIC_PRIVATE_LIBDIR}
+    )
 
     install(TARGETS cutecosmictheme DESTINATION ${QT_INSTALL_PLUGINS}/platformthemes)
 endif()

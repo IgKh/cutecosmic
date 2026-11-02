@@ -26,7 +26,6 @@
 #include <QtGui/private/qgenericunixthemes_p.h>
 #endif
 
-class CuteCosmicColorManager;
 class CuteCosmicWatcher;
 
 class CuteCosmicPlatformThemePrivate : public QObject
@@ -47,7 +46,6 @@ private:
     friend class CuteCosmicPlatformTheme;
 
     CuteCosmicWatcher* d_watcher;
-    CuteCosmicColorManager* d_colorManager;
 
     bool d_firstThemeChange;
     Qt::ColorScheme d_requestedScheme;

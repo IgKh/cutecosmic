@@ -2,7 +2,7 @@
 
 Plugins to the Qt toolkit that help make Qt (and KDE) applications look and feel more at home in the COSMIC™ Desktop environment.
 
-Currently consists of a Qt Platform Theme plugin.
+Currently consists of a Qt Platform Theme plugin as well as an optional (and experimental) platform plugin for KDE Union.
 
 > [!IMPORTANT]
 > CuteCosmic is still experimental, but should already work reasonably well. Advanced users are encouraged to test it and [report any issues](https://github.com/IgKh/cutecosmic/issues).
@@ -68,6 +68,8 @@ To build and install use a regular CMake invocation like this:
 ```
 
 You may need to add `sudo` to the last command if building against a system-wide Qt installation. For building against a specific Qt installation, use the path to its specific `qt-cmake` wrapper script instead of `cmake`.
+
+To build the optional Union plugin, add `-DCUTECOSMIC_UNION=ON` to the CMake configuration line. You'll need KDE Plasma development files to be available and ensure that they match the version of Qt compiling against.
 
 ## Usage
 

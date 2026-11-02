@@ -100,8 +100,6 @@ CuteCosmicPlatformThemePrivate::CuteCosmicPlatformThemePrivate()
     d_watcher = new CuteCosmicWatcher(this);
     connect(d_watcher, &CuteCosmicWatcher::themeChanged, this, &CuteCosmicPlatformThemePrivate::themeChanged);
 
-    d_colorManager = new CuteCosmicColorManager(this);
-
     reloadTheme();
     setQtQuickStyle();
 }
@@ -120,7 +118,7 @@ void CuteCosmicPlatformThemePrivate::reloadTheme()
         break;
     }
 
-    d_colorManager->reloadThemeColors();
+    CuteCosmicColorManager::instance()->reloadThemeColors();
 
     d_interfaceFont = loadFont(CosmicFontKind::Interface);
     d_monospaceFont = loadFont(CosmicFontKind::Monospace);
@@ -207,14 +205,16 @@ QPlatformDialogHelper* CuteCosmicPlatformTheme::createPlatformDialogHelper(Dialo
 
 const QPalette* CuteCosmicPlatformTheme::palette(Palette type) const
 {
+    CuteCosmicColorManager* colorManager = CuteCosmicColorManager::instance();
+
     if (type == QPlatformTheme::SystemPalette) {
-        return d_ptr->d_colorManager->systemPalette();
+        return colorManager->systemPalette();
     }
     else if (type == QPlatformTheme::MenuPalette || type == QPlatformTheme::ToolButtonPalette) {
-        return d_ptr->d_colorManager->menuPalette();
+        return colorManager->menuPalette();
     }
     else if (type == QPlatformTheme::ButtonPalette) {
-        return d_ptr->d_colorManager->buttonPalette();
+        return colorManager->buttonPalette();
     }
     return nullptr;
 }
@@ -255,7 +255,7 @@ QVariant CuteCosmicPlatformTheme::themeHint(ThemeHint hint) const
 
 QIconEngine* CuteCosmicPlatformTheme::createIconEngine(const QString& iconName) const
 {
-    return new CuteCosmicIconEngine(iconName, d_ptr->d_colorManager);
+    return new CuteCosmicIconEngine(iconName);
 }
 
 Qt::ColorScheme CuteCosmicPlatformTheme::colorScheme() const
