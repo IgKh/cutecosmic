@@ -148,14 +148,15 @@ void CuteCosmicPlatformThemePrivate::setQtQuickStyle()
     // Kirigami apps (e.g plasma-systemmonitor) expect it to be set for them,
     // and if not they are visually broken. This isn't the nicest way, but
     // as they say, there is safety in numbers.
-    if (!QQuickStyle::name().isEmpty() && QQuickStyle::name() != "Fusion"_L1) {
-        return;
-    }
+    if (QQuickStyle::name().isEmpty() || QQuickStyle::name() == "Fusion"_L1) {
+        QString qmlPath = QLibraryInfo::path(QLibraryInfo::QmlImportsPath);
 
-    QString qmlPath = QLibraryInfo::path(QLibraryInfo::QmlImportsPath);
-
-    if (QDir(qmlPath + "/org/kde/desktop"_L1).exists()) {
-        QQuickStyle::setStyle("org.kde.desktop"_L1);
+        if (QDir(qmlPath + "/org/kde/union"_L1).exists()) {
+            QQuickStyle::setStyle("org.kde.union"_L1);
+        }
+        else if (QDir(qmlPath + "/org/kde/desktop"_L1).exists()) {
+            QQuickStyle::setStyle("org.kde.desktop"_L1);
+        }
     }
 
     if (QQuickStyle::name() == "org.kde.desktop"_L1) {
