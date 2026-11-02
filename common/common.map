@@ -1,0 +1,13 @@
+{
+    global:
+        libcosmic_*;
+
+        extern "C++" {
+            CuteCosmic*;
+            vtable?for?CuteCosmic*;
+            typeinfo?for?CuteCosmic*;
+            typeinfo?name?for?CuteCosmic*;
+        };
+
+    local: *;
+};
