@@ -75,7 +75,7 @@ impl Executor for LocalExecutor {
 /// a new item arrives
 #[derive(Clone)]
 struct CallbackSink {
-    callback: extern "C" fn(*mut c_void) -> c_void,
+    callback: extern "C" fn(*mut c_void),
     data: *mut c_void,
 }
 
@@ -133,7 +133,7 @@ where
 
 #[unsafe(no_mangle)]
 pub extern "C" fn libcosmic_watcher_start(
-    callback: extern "C" fn(*mut c_void) -> c_void,
+    callback: extern "C" fn(*mut c_void),
     data: *mut c_void,
 ) -> *mut CosmicWatcherToken {
     struct ThemeModeSubscription;
