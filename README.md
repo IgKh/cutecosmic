@@ -63,7 +63,8 @@ To build and install use a regular CMake invocation like this:
 
 ```bash
   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-  cmake --build build -t install
+  cmake --build build
+  cmake --install build
 ```
 
 You may need to add `sudo` to the last command if building against a system-wide Qt installation. For building against a specific Qt installation, use the path to its specific `qt-cmake` wrapper script instead of `cmake`.
