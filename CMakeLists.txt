@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 project(cutecosmic VERSION 0.3.0 LANGUAGES CXX)
 
+option(CUTECOSMIC_UNION "Build Union (KDE) integration" OFF)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -44,3 +46,7 @@ endif()
 add_subdirectory(bindings)
 add_subdirectory(common)
 add_subdirectory(platformtheme)
+
+if(CUTECOSMIC_UNION)
+    add_subdirectory(union/platform)
+endif()

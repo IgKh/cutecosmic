@@ -1,0 +1,11 @@
+{
+    "union-plugintype": "platform",
+    "union-pluginname": "cutecosmic",
+    "union-supported-platforms": [
+        "wayland",
+        "xcb"
+    ],
+    "union-supported-sessions": [
+        "cosmic"
+    ]
+}

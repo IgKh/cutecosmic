@@ -22,13 +22,27 @@
 #include <QDir>
 #include <QLoggingCategory>
 #include <QPalette>
+#include <QPointer>
 #include <QSaveFile>
 #include <QTemporaryFile>
 #include <QTextStream>
+#include <QThread>
 
 using namespace Qt::StringLiterals;
 
 Q_DECLARE_LOGGING_CATEGORY(lcCuteCosmic)
+
+CuteCosmicColorManager* CuteCosmicColorManager::instance()
+{
+    static QPointer<CuteCosmicColorManager> ptr;
+    if (!ptr) {
+        Q_ASSERT(QThread::isMainThread());
+        Q_ASSERT(QCoreApplication::instance() != nullptr);
+
+        ptr = new CuteCosmicColorManager(QCoreApplication::instance());
+    }
+    return ptr.get();
+}
 
 CuteCosmicColorManager::CuteCosmicColorManager(QObject* parent)
     : QObject(parent)
@@ -58,13 +72,15 @@ void CuteCosmicColorManager::reloadThemeColors()
     d_iconCss.clear();
 }
 
-QString CuteCosmicColorManager::iconCss()
+QString CuteCosmicColorManager::iconCss(const QColor& tint)
 {
-    if (!d_iconCss.isEmpty()) {
-        return d_iconCss;
+    if (tint != Qt::transparent) {
+        return buildKdeIconCss(tint);
     }
 
-    rebuildKdeIconCss();
+    if (d_iconCss.isEmpty()) {
+        d_iconCss = buildKdeIconCss(Qt::transparent);
+    }
     return d_iconCss;
 }
 
@@ -391,7 +407,7 @@ void CuteCosmicColorManager::rebuildKdeColors()
     }
 }
 
-void CuteCosmicColorManager::rebuildKdeIconCss()
+QString CuteCosmicColorManager::buildKdeIconCss(const QColor& tint)
 {
     QPalette systemPalette;
     if (libcosmic_theme_should_apply_colors()) {
@@ -402,7 +418,7 @@ void CuteCosmicColorManager::rebuildKdeIconCss()
     CosmicExtendedPalette ep;
     libcosmic_theme_get_extended_palette(&ep);
 
-    QColor windowText = systemPalette.color(QPalette::Active, QPalette::WindowText);
+    QColor windowText = tint == Qt::transparent ? systemPalette.color(QPalette::Active, QPalette::WindowText) : tint;
     QColor windowBackground = systemPalette.color(QPalette::Active, QPalette::Window);
     QColor highlightedText = systemPalette.color(QPalette::Active, QPalette::HighlightedText);
     QColor accent = systemPalette.color(QPalette::Active, QPalette::Accent);
@@ -410,16 +426,18 @@ void CuteCosmicColorManager::rebuildKdeIconCss()
     QColor neutral = convertColor(ep.warning);
     QColor positive = convertColor(ep.success);
 
-    d_iconCss.clear();
-    QTextStream stream { &d_iconCss };
+    QString result;
+    QTextStream stream { &result };
 
     stream << ".ColorScheme-Text{ color:" << windowText.name() << "; } ";
     stream << ".ColorScheme-Background{ color:" << windowBackground.name() << "; } ";
     stream << ".ColorScheme-HighlightedText{ color:" << highlightedText.name() << "; } ";
-    stream << ".ColorScheme-Accent{ color:" << accent.name() << "; }";
+    stream << ".ColorScheme-Accent{ color:" << accent.name() << "; } ";
     stream << ".ColorScheme-PositiveText{ color:" << positive.name() << "; } ";
     stream << ".ColorScheme-NeutralText{ color:" << neutral.name() << "; } ";
     stream << ".ColorScheme-NegativeText{ color:" << negative.name() << "; } ";
+
+    return result;
 }
 
 #include "moc_cutecosmiccolormanager.cpp"

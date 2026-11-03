@@ -15,15 +15,15 @@
 
 using namespace Qt::Literals;
 
-CuteCosmicIconEngine::CuteCosmicIconEngine(const QString& iconName, CuteCosmicColorManager* colorManager)
+CuteCosmicIconEngine::CuteCosmicIconEngine(const QString& iconName, const QColor& tint)
     : d_iconInfo(QIconLoader::instance()->loadIcon(iconName))
-    , d_colorManager(colorManager)
+    , d_tintColor(tint)
 {
 }
 
 QIconEngine* CuteCosmicIconEngine::clone() const
 {
-    return new CuteCosmicIconEngine(d_iconInfo.iconName, d_colorManager);
+    return new CuteCosmicIconEngine(d_iconInfo.iconName, d_tintColor);
 }
 
 QString CuteCosmicIconEngine::key() const
@@ -147,6 +147,7 @@ QPixmap CuteCosmicIconEngine::renderSvgIcon(const QString& path, const QSize& si
                            << path << "|"_L1
                            << mode << "|"_L1
                            << size.width() << "|"_L1
+                           << d_tintColor.name() << "|"_L1
                            << appPalette.cacheKey();
 
     QPixmap result;
@@ -164,7 +165,8 @@ QPixmap CuteCosmicIconEngine::renderSvgIcon(const QString& path, const QSize& si
         return QPixmap();
     }
 
-    bool isKdeSymbolic = preprocessSvgIcon(&file, &buffer, d_colorManager->iconCss());
+    QString iconCss = CuteCosmicColorManager::instance()->iconCss(d_tintColor);
+    bool isKdeSymbolic = preprocessSvgIcon(&file, &buffer, iconCss);
     buffer.seek(0);
 
     QImageReader reader { &buffer, "svg" };
@@ -172,7 +174,11 @@ QPixmap CuteCosmicIconEngine::renderSvgIcon(const QString& path, const QSize& si
 
     QImage image = reader.read().convertToFormat(QImage::Format_ARGB32);
     if (isSymbolic(d_iconInfo.iconName) && !isKdeSymbolic) {
-        QColor tint = appPalette.color(QPalette::Active, QPalette::Text);
+        QColor tint = d_tintColor;
+        if (tint == Qt::transparent) {
+            tint = appPalette.color(QPalette::Active, QPalette::Text);
+        }
+
         recolorIcon(image, tint);
     }
 

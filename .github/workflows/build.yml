@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Disable mandb triggers
         run: |
@@ -42,7 +42,34 @@ jobs:
             bindings -> ../build/cargo/build
 
       - name: Configure
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCUTECOSMIC_UNION=OFF
+
+      - name: Build
+        run: cmake --build build -j
+
+  build-union:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+
+    steps:
+      - name: Install dependencies
+        run: pacman -Syu --noconfirm --needed base-devel git cmake rustup corrosion qt6-base qt6-declarative union
+
+      - name: Checkout source code
+        uses: actions/checkout@v7
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: 'build'
+          workspaces: |
+            bindings -> ../build/cargo/build
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCUTECOSMIC_UNION=ON
 
       - name: Build
         run: cmake --build build -j
