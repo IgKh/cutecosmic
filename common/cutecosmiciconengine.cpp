@@ -110,9 +110,7 @@ static bool preprocessSvgIcon(QIODevice* in, QIODevice* out, const QString& icon
             writer.writeCharacters(iconCss);
             writer.writeEndElement();
 
-            while (reader.tokenType() != QXmlStreamReader::EndElement && reader.error() == QXmlStreamReader::NoError) {
-                reader.readNext();
-            }
+            reader.skipCurrentElement();
             isKdeSymbolic = true;
         }
         else {
