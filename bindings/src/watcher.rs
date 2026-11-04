@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-use std::{any::TypeId, cell::RefCell, ffi::c_void, rc::Rc, task::Poll};
+use std::{any::TypeId, cell::RefCell, ffi::c_void, rc::Rc, task::Poll, thread::JoinHandle};
 
 use cosmic::{
     config::CosmicTk,
@@ -35,6 +35,7 @@ use iced_futures::{Runtime, subscription::into_recipes};
 
 pub struct CosmicWatcherToken {
     stop_signal: oneshot::Sender<()>,
+    thread_handle: JoinHandle<()>,
 }
 
 /// Very simple iced executor that does everything on the thread it is run on,
@@ -144,7 +145,7 @@ pub extern "C" fn libcosmic_watcher_start(
     let sender = CallbackSink { callback, data };
     let (stop_tx, stop_rx) = oneshot::channel::<()>();
 
-    std::thread::Builder::new()
+    let handle = std::thread::Builder::new()
         .name("CuteCosmicWatcher".into())
         .spawn(move || {
             let proxy = block_on(cosmic_config::dbus::settings_daemon_proxy()).ok();
@@ -171,11 +172,15 @@ pub extern "C" fn libcosmic_watcher_start(
             rt.track(into_recipes(sub));
 
             executor.run(stop_rx);
-        })
-        .unwrap();
+        });
+
+    let Ok(handle) = handle else {
+        return std::ptr::null_mut();
+    };
 
     let token = CosmicWatcherToken {
         stop_signal: stop_tx,
+        thread_handle: handle,
     };
     Box::into_raw(Box::new(token))
 }
@@ -184,4 +189,5 @@ pub extern "C" fn libcosmic_watcher_start(
 pub extern "C" fn libcosmic_watcher_stop(token: *mut CosmicWatcherToken) {
     let token = unsafe { Box::from_raw(token) };
     let _ = token.stop_signal.send(());
+    let _ = token.thread_handle.join();
 }

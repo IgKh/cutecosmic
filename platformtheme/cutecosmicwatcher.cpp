@@ -18,6 +18,7 @@
 
 #include "bindings.h"
 
+#include <QDebug>
 #include <QTimer>
 
 CuteCosmicWatcher::CuteCosmicWatcher(QObject* parent)
@@ -52,6 +53,9 @@ void CuteCosmicWatcher::startWatching()
     };
 
     d_watcherToken = libcosmic_watcher_start(callback, reinterpret_cast<void*>(this));
+    if (d_watcherToken == nullptr) {
+        qWarning() << "Could not start CuteCosmic watcher!";
+    }
 }
 
 void CuteCosmicWatcher::configurationChanged()
