@@ -30,7 +30,7 @@ use cosmic::{
         },
     },
 };
-use cosmic_settings_daemon::CosmicSettingsDaemonProxy;
+use cosmic_settings_daemon_zbus::CosmicSettingsDaemonProxy;
 use iced_futures::{Runtime, subscription::into_recipes};
 
 pub struct CosmicWatcherToken {
