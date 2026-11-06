@@ -18,6 +18,8 @@
 
 #include "cutecosmiciconengine.h"
 
+#include "bindings.h"
+
 #include <QGuiApplication>
 #include <QIcon>
 
@@ -37,7 +39,7 @@ QString CuteCosmicUnionPlatform::defaultStyleName()
 
 QIcon CuteCosmicUnionPlatform::platformIcon(const QString& name, const QColor& color)
 {
-    if (name.isEmpty()) {
+    if (name.isEmpty() || !libcosmic_theme_is_loaded()) {
         return Union::PlatformPlugin::platformIcon(name, color);
     }
 

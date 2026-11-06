@@ -3,6 +3,7 @@
         libcosmic_*;
 
         extern "C++" {
+            lcCuteCosmic*;
             CuteCosmic*;
             vtable?for?CuteCosmic*;
             typeinfo?for?CuteCosmic*;

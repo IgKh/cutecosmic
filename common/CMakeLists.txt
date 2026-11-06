@@ -6,6 +6,7 @@ endif()
 
 set(SOURCES
     cutecosmiccolormanager.cpp
+    cutecosmiccommon.cpp
     cutecosmiciconengine.cpp
 )
 
@@ -21,7 +22,10 @@ target_include_directories(cutecosmiccommon
 
 target_link_libraries(cutecosmiccommon PRIVATE bindings PUBLIC Qt::GuiPrivate)
 
-target_link_options(cutecosmiccommon PRIVATE "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/common.map")
+target_link_options(cutecosmiccommon PRIVATE
+    "-Wl,--no-undefined"
+    "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/common.map"
+)
 
 set_target_properties(cutecosmiccommon PROPERTIES
     VERSION ${PROJECT_VERSION}
