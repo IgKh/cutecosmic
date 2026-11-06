@@ -7,9 +7,9 @@ publish = false
 crate-type = ["staticlib"]
 
 [dependencies]
-libcosmic = { git = "https://github.com/pop-os/libcosmic", rev = "5187dd6", default-features = false }
-iced_futures = { git = "https://github.com/pop-os/libcosmic", rev = "5187dd6" }
-cosmic-settings-daemon = { git = "https://github.com/pop-os/dbus-settings-bindings" }
+libcosmic = { git = "https://github.com/pop-os/libcosmic", rev = "7cd76ae", default-features = false }
+iced_futures = { git = "https://github.com/pop-os/libcosmic", rev = "7cd76ae" }
+cosmic-settings-daemon-zbus = { git = "https://github.com/pop-os/dbus-settings-bindings" }
 atomic_refcell = "0.1.13"
 
 [build-dependencies]
