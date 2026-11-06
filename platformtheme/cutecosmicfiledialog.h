@@ -76,7 +76,10 @@ private Q_SLOTS:
     void gotResponse(uint response, const QVariantMap& results);
 
 private:
-    QVariantMap buildPortalOptions(Qt::WindowModality windowModality);
+    QVariantMap buildPortalOptions(Qt::WindowModality windowModality, const QString& token);
+
+    void disconnectPortalResponseSignal();
+    void closePortalDialog(const QString& path);
 
     static bool isDirectoryChooserSupported();
 
@@ -87,4 +90,5 @@ private:
     QList<CuteCosmicFileDialogFilter> d_filters;
     QString d_selectedNameFilter;
     QString d_selectedMimeTypeFilter;
+    QString d_lastReplyPath;
 };

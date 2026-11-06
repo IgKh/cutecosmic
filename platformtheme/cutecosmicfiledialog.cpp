@@ -171,7 +171,7 @@ QList<QUrl> CuteCosmicFileDialog::selectedFiles() const
 
 void CuteCosmicFileDialog::selectFile(const QUrl& filename)
 {
-    d_selectedFiles.append(filename);
+    d_selectedFiles = { filename };
 }
 
 void CuteCosmicFileDialog::setFilter()
@@ -198,13 +198,12 @@ void CuteCosmicFileDialog::selectMimeTypeFilter(const QString&)
     // Not supported
 }
 
-QVariantMap CuteCosmicFileDialog::buildPortalOptions(Qt::WindowModality windowModality)
+QVariantMap CuteCosmicFileDialog::buildPortalOptions(Qt::WindowModality windowModality, const QString& token)
 {
     QVariantMap portalOptions;
 
     // handle_token (s)
-    QString token = QUuid::createUuid().toString(QUuid::Id128);
-    portalOptions["handle_token"_L1] = "cc"_L1 + token;
+    portalOptions["handle_token"_L1] = token;
 
     // accept_label (s)
     if (options()->isLabelExplicitlySet(QFileDialogOptions::Accept)) {
@@ -232,6 +231,8 @@ QVariantMap CuteCosmicFileDialog::buildPortalOptions(Qt::WindowModality windowMo
     }
 
     // filters (a(sa(us))
+    d_filters.clear();
+
     const QStringList nameFilters = options()->nameFilters();
     for (const QString& filter : nameFilters) {
         CuteCosmicFileDialogFilter f = CuteCosmicFileDialogFilter::parseNameFilter(filter);
@@ -292,15 +293,66 @@ QVariantMap CuteCosmicFileDialog::buildPortalOptions(Qt::WindowModality windowMo
     return portalOptions;
 }
 
+static QString expectedReplyPath(const QString& token)
+{
+    /*
+     * https://flatpak.github.io/xdg-desktop-portal/docs/doc-org.freedesktop.portal.Request.html
+     *
+     * "Since version 0.9 of xdg-desktop-portal, the handle will be of the form
+     * `/org/freedesktop/portal/desktop/request/SENDER/TOKEN` where `SENDER` is
+     * the caller’s unique name, with the initial ':' removed and all '.'
+     * replaced by '_', and `TOKEN` is a unique token that the caller provided
+     * with the handle_token key in the options vardict.
+     *
+     * This change was made to let applications subscribe to the Response signal
+     * before making the initial portal call, thereby avoiding a race condition."
+     */
+    QString sender = QDBusConnection::sessionBus()
+                         .baseService()
+                         .mid(1)
+                         .replace(u'.', u'_');
+
+    return QString("/org/freedesktop/portal/desktop/request/%1/%2"_L1).arg(sender, token);
+}
+
+void CuteCosmicFileDialog::disconnectPortalResponseSignal()
+{
+    QDBusConnection::sessionBus().disconnect(
+        "org.freedesktop.portal.Desktop"_L1,
+        d_lastReplyPath,
+        "org.freedesktop.portal.Request"_L1,
+        "Response"_L1,
+        this,
+        SLOT(gotResponse(uint, QVariantMap)));
+
+    d_lastReplyPath.clear();
+}
+
+void CuteCosmicFileDialog::closePortalDialog(const QString& path)
+{
+    QDBusInterface iface {
+        "org.freedesktop.portal.Desktop"_L1,
+        path,
+        "org.freedesktop.portal.Request"_L1
+    };
+
+    iface.asyncCall("Close"_L1);
+}
+
 bool CuteCosmicFileDialog::show(Qt::WindowFlags windowFlags, Qt::WindowModality windowModality, QWindow* parent)
 {
     Q_UNUSED(windowFlags);
+
+    if (!d_lastReplyPath.isEmpty()) {
+        disconnectPortalResponseSignal();
+    }
 
     if (d_directory.isEmpty()) {
         setDirectory(options()->initialDirectory());
     }
 
-    QVariantMap portalOptions = buildPortalOptions(windowModality);
+    QString token = "cc"_L1 + QUuid::createUuid().toString(QUuid::Id128);
+    QVariantMap portalOptions = buildPortalOptions(windowModality, token);
     if (portalOptions.isEmpty()) {
         return false;
     }
@@ -311,6 +363,21 @@ bool CuteCosmicFileDialog::show(Qt::WindowFlags windowFlags, Qt::WindowModality 
         if (services) {
             parentRef = services->portalWindowIdentifier(parent);
         }
+    }
+
+    d_lastReplyPath = expectedReplyPath(token);
+
+    bool ok = QDBusConnection::sessionBus().connect(
+        "org.freedesktop.portal.Desktop"_L1,
+        d_lastReplyPath,
+        "org.freedesktop.portal.Request"_L1,
+        "Response"_L1,
+        this,
+        SLOT(gotResponse(uint, QVariantMap)));
+
+    if (!ok) {
+        d_lastReplyPath.clear();
+        return false;
     }
 
     QDBusInterface iface {
@@ -330,17 +397,19 @@ bool CuteCosmicFileDialog::show(Qt::WindowFlags windowFlags, Qt::WindowModality 
     QDBusReply<QDBusObjectPath> reply = message;
     if (!reply.isValid()) {
         qWarning() << "Failed requesting file chooser via portal:" << reply.error();
+
+        disconnectPortalResponseSignal();
         return false;
     }
 
-    QDBusConnection::sessionBus().connect(
-        "org.freedesktop.portal.Desktop"_L1,
-        reply.value().path(),
-        "org.freedesktop.portal.Request"_L1,
-        "Response"_L1,
-        this,
-        SLOT(gotResponse(uint, QVariantMap)));
+    if (reply.value().path() != d_lastReplyPath) {
+        qWarning() << "Actual portal reply path" << reply.value().path()
+                   << "different from expected" << d_lastReplyPath;
 
+        closePortalDialog(reply.value().path());
+        disconnectPortalResponseSignal();
+        return false;
+    }
     return true;
 }
 
@@ -352,10 +421,20 @@ void CuteCosmicFileDialog::exec()
 
 void CuteCosmicFileDialog::hide()
 {
+    if (!d_lastReplyPath.isEmpty()) {
+        closePortalDialog(d_lastReplyPath);
+        disconnectPortalResponseSignal();
+    }
+
+    if (d_loop->isRunning()) {
+        d_loop->quit();
+    }
 }
 
 void CuteCosmicFileDialog::gotResponse(uint response, const QVariantMap& results)
 {
+    disconnectPortalResponseSignal();
+
     if (response != 0) {
         Q_EMIT reject();
         return;
