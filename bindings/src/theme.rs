@@ -87,6 +87,11 @@ pub extern "C" fn libcosmic_theme_load(kind: CosmicThemeKind) {
 }
 
 #[unsafe(no_mangle)]
+pub extern "C" fn libcosmic_theme_is_loaded() -> bool {
+    CURRENT_THEME.borrow().is_some()
+}
+
+#[unsafe(no_mangle)]
 pub extern "C" fn libcosmic_theme_is_dark() -> bool {
     current_theme().cosmic().is_dark
 }
