@@ -27,7 +27,6 @@
 #include <QDir>
 #include <QFont>
 #include <QLibraryInfo>
-#include <QLoggingCategory>
 #include <QPalette>
 #include <QQuickStyle>
 
@@ -39,8 +38,6 @@ static constexpr int DEFAULT_FONT_SIZE = 9;
 #endif
 
 static constexpr int MINI_FONT_SIZE = 8;
-
-Q_LOGGING_CATEGORY(lcCuteCosmic, "cutecosmic", QtWarningMsg)
 
 using namespace Qt::StringLiterals;
 
